@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/Krijger/docker-gradle.svg?branch=master)](https://travis-ci.org/Krijger/docker-gradle)
 # docker-gradle
 Gradle plugin for building, testing and deploying Docker images using docker compose
 

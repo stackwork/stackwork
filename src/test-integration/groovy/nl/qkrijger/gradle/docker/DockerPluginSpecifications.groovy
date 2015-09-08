@@ -12,9 +12,9 @@ class DockerPluginSpecifications extends Specification {
     println "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  ENDING CHILD GRADLE TEST BUILD  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
   }
 
-  def "The build image task should build the DockerFile in the project root"() {
+  def "The build image task builds the DockerFile in the project root"() {
     when:
-    def proc = "gradle buildImage -i --stacktrace --project-dir src/test-integration/resources/docker-project".execute()
+    def proc = "gradle buildImage -i --stacktrace --project-dir src/test-integration/resources/docker-project-build".execute()
     proc.waitForProcessOutput(System.out as OutputStream, System.err as OutputStream)
 
     then:

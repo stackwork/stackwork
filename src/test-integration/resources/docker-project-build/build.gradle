@@ -1,0 +1,15 @@
+buildscript {
+  dependencies {
+    classpath fileTree(dir: '../../../../build/libs')
+  }
+}
+
+apply plugin: 'docker'
+
+task("assertAndCleanup", description: 'Inspect and remove the test docker image', type: Exec) {
+  doFirst{
+    commandLine './inspect-and-remove.sh', project.docker.imageId
+  }
+}.mustRunAfter(tasks.buildImage)
+
+tasks.buildImage.finalizedBy(tasks.assertAndCleanup)

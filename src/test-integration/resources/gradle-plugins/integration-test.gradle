@@ -27,11 +27,11 @@ task integrationTest(type: Test) {
   classpath = sourceSets.integrationTest.runtimeClasspath
 
   def out = services.get(StyledTextOutputFactory).create("colored-test-output")
-  out.style(Style.Normal)
+  out.style Style.Normal
 
   beforeSuite { suite ->
     if (suite.name.startsWith("Test Run") || suite.name.startsWith("Gradle Worker")) return
-    out.println("\n" + suite.name)
+    out.println "\n${suite.name}"
   }
   afterTest { descriptor, result ->
     def style
@@ -39,7 +39,7 @@ task integrationTest(type: Test) {
     else if (result.skippedTestCount > 0) style = Style.ProgressStatus
     else style = Style.Success
 
-    out.text('  ').withStyle(style).println(descriptor.name)
+    out.text('  ').withStyle(style).println descriptor.name
   }
 }
 

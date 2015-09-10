@@ -7,7 +7,7 @@ System.setProperty("org.gradle.color.success", "GREEN")
 
 test {
   def out = services.get(StyledTextOutputFactory).create("colored-test-output")
-  out.style(Style.Normal)
+  out.style Style.Normal
 
   beforeSuite { suite ->
     if (suite.name.startsWith("Test Run") || suite.name.startsWith("Gradle Worker")) return
@@ -19,6 +19,6 @@ test {
     else if (result.skippedTestCount > 0) style = Style.ProgressStatus
     else style = Style.Success
 
-    out.text('  ').withStyle(style).println(descriptor.name)
+    out.text('  ').withStyle(style).println descriptor.name
   }
 }

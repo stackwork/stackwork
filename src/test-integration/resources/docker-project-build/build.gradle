@@ -7,9 +7,9 @@ buildscript {
 apply plugin: 'docker'
 
 task("assertAndCleanup", description: 'Inspect and remove the test docker image', type: Exec) {
-  doFirst{
+  doFirst {
     commandLine file('inspect-and-remove.sh').absolutePath, project.docker.imageId
   }
-}.mustRunAfter(tasks.buildImage)
+}.mustRunAfter tasks.buildImage
 
-tasks.buildImage.finalizedBy(tasks.assertAndCleanup)
+tasks.buildImage.finalizedBy tasks.assertAndCleanup

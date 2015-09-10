@@ -34,7 +34,7 @@ class DockerPluginSpecifications extends Specification {
 
     then:
     output.process.exitValue() != 0
-    output.standardErr.contains("No project version defined. Cannot tag image.")
+    output.standardErr.contains 'No project version defined. Cannot tag image.'
   }
 
   private static GradleOutput runGradleTask(String task, String project) {

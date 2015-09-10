@@ -28,12 +28,12 @@ class DockerPlugin implements Plugin<Project> {
 
     project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask) {
       description = 'Builds the Dockerfile in your project root folder.'
-      group = "Docker"
+      group = 'Docker'
     }
 
     project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask) {
       description = 'Tag the built during "buildImage" with the docker.imageName and project.version.'
-      group = "Docker"
+      group = 'Docker'
     }.dependsOn BUILD_IMAGE_TASK_NAME
 
   }

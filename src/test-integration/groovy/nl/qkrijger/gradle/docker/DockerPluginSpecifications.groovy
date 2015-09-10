@@ -38,7 +38,7 @@ class DockerPluginSpecifications extends Specification {
   }
 
   private static GradleOutput runGradleTask(String task, String project) {
-    def proc = "gradle $task -i --stacktrace --project-dir src/test-integration/resources/$project".execute()
+    def proc = "gradle $task -i --stacktrace --project-dir src/test-integration/builds/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()
     OutputStream standardErr = new ByteArrayOutputStream()
     proc.waitForProcessOutput(standardOut, standardErr)

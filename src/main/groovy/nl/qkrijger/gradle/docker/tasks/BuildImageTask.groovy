@@ -6,10 +6,10 @@ class BuildImageTask extends Exec {
 
   BuildImageTask() {
 
-    commandLine('sh', project.file('.gradle/docker/build.sh').absolutePath, project.projectDir)
+    commandLine 'sh', project.file('.gradle/docker/build.sh').absolutePath, project.projectDir
 
     def buffer = new ByteArrayOutputStream()
-    setStandardOutput(buffer)
+    setStandardOutput buffer
 
     doLast {
       def output = buffer.toString('UTF-8')
@@ -21,8 +21,8 @@ class BuildImageTask extends Exec {
 
       def imageId = imageIdMatcher.group('imageId')
 
-      logger.info "Docker image id: ${imageId}"
-      project.ext.docker.put('imageId',imageId)
+      logger.info 'Docker image id: {}', imageId
+      project.ext.docker.imageId = imageId
     }
   }
 }

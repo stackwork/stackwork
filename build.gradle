@@ -1,6 +1,6 @@
 apply plugin: 'groovy'
-apply from: './src/test-integration/resources/gradle-plugins/colored-test-output.gradle'
-apply from: './src/test-integration/resources/gradle-plugins/integration-test.gradle'
+apply from: './src/test-integration/gradle-plugins/colored-test-output.gradle'
+apply from: './src/test-integration/gradle-plugins/integration-test.gradle'
 
 repositories {
   mavenCentral()

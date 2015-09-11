@@ -14,7 +14,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "The build image task builds the DockerFile in the project root"() {
     when:
-    GradleOutput output = runGradleTask('buildImage', 'docker-project-build')
+    GradleOutput output = runGradleTask('buildImage', 'build')
 
     then:
     output.process.exitValue() == 0
@@ -22,7 +22,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "The tag image task tags a built image with the project version number"() {
     when:
-    GradleOutput output = runGradleTask('tagImage', 'docker-project-tag')
+    GradleOutput output = runGradleTask('tagImage', 'tag')
 
     then:
     output.process.exitValue() == 0
@@ -30,7 +30,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "Tagging an image does not work if the project.version is not set"() {
     when:
-    GradleOutput output = runGradleTask('tagImage', 'docker-project-tag-no-version')
+    GradleOutput output = runGradleTask('tagImage', 'tag-no-version')
 
     then:
     output.process.exitValue() != 0
@@ -38,7 +38,7 @@ class DockerPluginSpecifications extends Specification {
   }
 
   private static GradleOutput runGradleTask(String task, String project) {
-    def proc = "gradle $task -i --stacktrace --project-dir src/test-integration/builds/$project".execute()
+    def proc = "gradle $task -i --stacktrace --project-dir src/test-integration/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()
     OutputStream standardErr = new ByteArrayOutputStream()
     proc.waitForProcessOutput(standardOut, standardErr)

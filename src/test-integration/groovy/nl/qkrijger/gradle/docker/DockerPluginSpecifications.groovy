@@ -34,7 +34,16 @@ class DockerPluginSpecifications extends Specification {
 
     then:
     output.process.exitValue() != 0
-    output.standardErr.contains 'No project version defined. Cannot tag image.'
+    output.standardErr.contains 'No project version defined. Cannot tag image. Please set "project.version".'
+  }
+
+  def "Tagging an image does not work if the docker.imageName is not set"() {
+    when:
+    GradleOutput output = runGradleTask('tagImage', 'tag-no-image-name')
+
+    then:
+    output.process.exitValue() != 0
+    output.standardErr.contains 'No docker image name defined. Cannot tag image. Please set "docker.imageName".'
   }
 
   private static GradleOutput runGradleTask(String task, String project) {

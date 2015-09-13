@@ -24,8 +24,8 @@ The resulting image id is exposed to Gradle via the docker object.
 ### Gradle task tagImage
 
 The `tagImage` task tags the image built during `buildImage` with the `project.version` (as tag) and `docker.imageName`
-(as name). No properties are exposed to Gradle, but the task will fail in case `project.version` or `docker.imageName`
-doesn't exist.
+(as name). The task will fail in case `project.version` or `docker.imageName` doesn't exist.
+The full image name including tag is exposed to Gradle via the docker object.
 E.g. the `build.gradle` can contain:
 
     version = '1.1-SNAPSHOT'

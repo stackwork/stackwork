@@ -9,9 +9,7 @@ apply plugin: 'docker'
 version = '1.1-SNAPSHOT'
 
 task('cleanup', description: 'Remove the test docker image', type: Exec) {
-  doFirst {
-    commandLine file('remove-image-by-id.sh').absolutePath, project.docker.imageId
-  }
+  commandLine file('remove-image-by-id.sh').absolutePath, "${->project.docker.imageId}"
 }.mustRunAfter tasks.buildImage
 
 tasks.tagImage.finalizedBy tasks.cleanup

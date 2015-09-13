@@ -20,7 +20,7 @@ class DockerPluginSpecifications extends Specification {
     output.process.exitValue() == 0
   }
 
-  def "The tag image task tags a built image with the project version number"() {
+  def "The tag image task tags a built image with 'docker.imageName:project.version' number, which is exposed as 'docker.fullImageName'"() {
     when:
     GradleOutput output = runGradleTask('tagImage', 'tag')
 

@@ -10,9 +10,7 @@ version = '1.1-SNAPSHOT'
 docker.imageName = 'my-image'
 
 task("assertAndCleanup", description: 'Inspect and remove the test docker image', type: Exec) {
-  doFirst {
-    commandLine file('inspect-and-remove.sh').absolutePath, project.docker.imageName, project.version
-  }
+  commandLine file('inspect-and-remove.sh').absolutePath, "${-> project.docker.imageName}", project.version
 }.mustRunAfter tasks.buildImage
 
 tasks.tagImage.finalizedBy tasks.assertAndCleanup

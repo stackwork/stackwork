@@ -34,4 +34,4 @@ E.g. the `build.gradle` can contain:
 
 The plugin is currently releases manually to [Bintray][bt]
 
-[bt] https://bintray.com/qkrijger/gradle-plugins/docker-gradle
+[bt]: https://bintray.com/qkrijger/gradle-plugins/docker-gradle

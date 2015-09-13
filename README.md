@@ -29,3 +29,9 @@ E.g. the `build.gradle` can contain:
 
     version = '1.1-SNAPSHOT'
     docker.imageName = 'my-image'
+
+## Get the plugin
+
+The plugin is currently releases manually to [Bintray][bt]
+
+[bt] https://bintray.com/qkrijger/gradle-plugins/docker-gradle

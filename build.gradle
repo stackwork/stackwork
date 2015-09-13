@@ -1,9 +1,40 @@
-apply plugin: 'groovy'
+plugins {
+  id 'groovy'
+  id 'maven'
+  id 'maven-publish'
+  id 'nebula.nebula-bintray' version '3.1.0'
+}
 apply from: './src/test-integration/gradle-plugins/colored-test-output.gradle'
 apply from: './src/test-integration/gradle-plugins/integration-test.gradle'
 
 repositories {
   mavenCentral()
+}
+
+publishing {
+  publications {
+    GradleDockerPublication(MavenPublication) {
+      from components.java
+      groupId 'nl.qkrijger.gradle'
+      artifactId 'docker-gradle'
+      version '0.1'
+    }
+  }
+}
+
+bintray {
+  user = project.bintrayUser ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+  key = project.bintrayKey ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
+  publications = ['GradleDockerPublication']
+  pkg {
+    repo = 'gradle-plugins'
+    name = 'docker-gradle'
+    userOrg = 'qkrijger'
+    licenses = ['Apache-2.0']
+    vcsUrl = 'https://github.com/Krijger/docker-gradle.git'
+    websiteUrl = 'https://github.com/Krijger/docker-gradle'
+    issueTrackerUrl = 'https://github.com/Krijger/docker-gradle/issues'
+  }
 }
 
 dependencies {
@@ -17,3 +48,5 @@ dependencies {
 task debug << {
   println "=======================" + System.getProperty('http.proxyHost') + ':' + System.getProperty('http.proxyPort')
 }
+
+tasks.bintrayUpload.dependsOn 'integrationTest'

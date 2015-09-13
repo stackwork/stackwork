@@ -3,4 +3,3 @@ tmp/
 *.iml
 /build/
 .gradle
-gradle.properties

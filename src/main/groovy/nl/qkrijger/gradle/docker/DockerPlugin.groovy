@@ -1,6 +1,7 @@
 package nl.qkrijger.gradle.docker
 
 import nl.qkrijger.gradle.docker.tasks.BuildImageTask
+import nl.qkrijger.gradle.docker.tasks.PushImageTask
 import nl.qkrijger.gradle.docker.tasks.TagImageTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -14,6 +15,7 @@ class DockerPlugin implements Plugin<Project> {
 
   private static final String BUILD_IMAGE_TASK_NAME = 'buildImage'
   private static final String TAG_IMAGE_TASK_NAME = 'tagImage'
+  private static final String PUSH_IMAGE_TASK_NAME = 'pushImage'
 
   private Project project
 
@@ -35,6 +37,11 @@ class DockerPlugin implements Plugin<Project> {
       description = 'Tag the built during "buildImage" with the docker.imageName and project.version.'
       group = 'Docker'
     }.dependsOn BUILD_IMAGE_TASK_NAME
+
+    project.task(PUSH_IMAGE_TASK_NAME, type: PushImageTask) {
+      description = 'Push the image tagged during "tagImage"'
+      group = 'Docker'
+    }.dependsOn TAG_IMAGE_TASK_NAME
 
   }
 

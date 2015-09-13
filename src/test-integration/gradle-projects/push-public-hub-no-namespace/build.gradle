@@ -1,0 +1,16 @@
+buildscript {
+  dependencies {
+    classpath fileTree(dir: '../../../../build/libs')
+  }
+}
+
+apply plugin: 'docker'
+
+version = '1.1-SNAPSHOT'
+docker.imageName = 'my-image'
+
+task("cleanupDocker", description: 'Inspect and remove the test docker image', type: Exec) {
+  commandLine file('remove-image-by-name-or-id.sh').absolutePath, "${-> project.docker.fullImageName}"
+}.mustRunAfter tasks.tagImage
+
+tasks.tagImage.finalizedBy tasks.cleanupDocker

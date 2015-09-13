@@ -31,6 +31,11 @@ E.g. the `build.gradle` can contain:
     version = '1.1-SNAPSHOT'
     docker.imageName = 'my-image'
 
+### Gradle task pushImage
+
+The `pushImage` task pushes the image tagged during `tagImage`. All logic for repositories, namespaces etc. comes from
+the `docker.imageName`.
+
 ## Get the plugin
 
 The plugin is currently releases manually to [Bintray][bt]

@@ -15,6 +15,9 @@ class TagImageTask extends Exec {
       }
     }
     commandLine 'docker', 'tag', "${-> project.docker.imageId}", "${-> project.docker.imageName}:${-> project.version}"
+    doLast {
+      project.ext.docker.fullImageName = "${project.docker.imageName}:${project.version}"
+    }
   }
 
 }

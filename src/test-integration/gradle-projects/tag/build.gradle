@@ -11,6 +11,11 @@ docker.imageName = 'my-image'
 
 task("assertAndCleanup", description: 'Inspect and remove the test docker image', type: Exec) {
   commandLine file('inspect-and-remove.sh').absolutePath, "${-> project.docker.imageName}", project.version
+  doLast {
+    if (!project.docker.fullImageName) {
+      throw new IllegalStateException('docker.fullImageName has not been set, which is what we are testing for -> fail')
+    }
+  }
 }.mustRunAfter tasks.buildImage
 
 tasks.tagImage.finalizedBy tasks.assertAndCleanup

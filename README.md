@@ -12,6 +12,7 @@ The object is reachable via `project.docker.[property]`. For the following build
 build task | property
 ---------- | -------------
 buildImage | imageId
+tagImage   | fullImageName
 
 
 ### Gradle task buildImage

@@ -23,7 +23,7 @@ task('groovydocJar', type: Jar) {
 
 publishing {
   publications {
-    GradleDockerPublication(MavenPublication) {
+    nebula(MavenPublication) {
       from components.java
       groupId 'nl.qkrijger.gradle'
       artifactId 'docker-gradle'
@@ -37,7 +37,7 @@ publishing {
 bintray {
   user = project.bintrayUser ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
   key = project.bintrayKey ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
-  publications = ['GradleDockerPublication']
+  publications = ['nebula']
   pkg {
     repo = 'gradle-plugins'
     name = 'docker-gradle'
@@ -46,6 +46,7 @@ bintray {
     vcsUrl = 'https://github.com/Krijger/docker-gradle.git'
     websiteUrl = 'https://github.com/Krijger/docker-gradle'
     issueTrackerUrl = 'https://github.com/Krijger/docker-gradle/issues'
+    labels = ['gradle', 'docker', 'plugin', 'ci']
   }
 }
 
@@ -62,3 +63,6 @@ task debug << {
 }
 
 tasks.bintrayUpload.dependsOn 'integrationTest'
+tasks.artifactoryPublish.dependsOn 'integrationTest'
+tasks.bintrayUpload.onlyIf { !(project.version as String).endsWith('SNAPSHOT') }
+tasks.artifactoryPublish.onlyIf { (project.version as String).endsWith('SNAPSHOT') }

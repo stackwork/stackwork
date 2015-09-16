@@ -34,9 +34,10 @@ publishing {
   }
 }
 
+project.bintrayUser = project.bintrayUser ?: System.getenv('BINTRAY_USER')
+project.bintrayKey = project.bintrayKey ?: System.getenv('BINTRAY_KEY')
+
 bintray {
-  user = project.bintrayUser ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-  key = project.bintrayKey ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
   publications = ['nebula']
   pkg {
     repo = 'gradle-plugins'

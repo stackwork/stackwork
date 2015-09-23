@@ -1,5 +1,4 @@
 package nl.qkrijger.gradle.docker
-
 import nl.qkrijger.gradle.docker.tasks.BuildImageTask
 import nl.qkrijger.gradle.docker.tasks.PushImageTask
 import nl.qkrijger.gradle.docker.tasks.TagImageTask
@@ -14,6 +13,7 @@ import java.nio.file.StandardCopyOption
 class DockerPlugin implements Plugin<Project> {
 
   private static final String BUILD_IMAGE_TASK_NAME = 'buildImage'
+  private static final String RUN_DOCKER_COMPOSE_TASK_NAME = 'runDockerCompose'
   private static final String TAG_IMAGE_TASK_NAME = 'tagImage'
   private static final String PUSH_IMAGE_TASK_NAME = 'pushImage'
 

@@ -38,6 +38,8 @@ the `docker.imageName`.
 
 ## Get the plugin
 
-The plugin is currently releases manually to [Bintray][bt]
+The plugin is currently released to [Bintray][bt], while snapshots are pushed to [JFrog][jf] under [builds][jfb].
 
 [bt]: https://bintray.com/qkrijger/gradle-plugins/docker-gradle
+[jf]: https://oss.jfrog.org
+[jfb]: https://oss.jfrog.org/artifactory/webapp/#/builds/gradle-docker

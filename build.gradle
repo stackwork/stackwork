@@ -4,8 +4,7 @@ plugins {
   id 'maven-publish'
   id 'nebula.nebula-bintray' version '3.1.0'
 }
-apply from: './src/test-integration/gradle-plugins/colored-test-output.gradle'
-apply from: './src/test-integration/gradle-plugins/integration-test.gradle'
+apply from: './src/test/gradle-plugins/colored-test-output.gradle'
 
 repositories {
   mavenCentral()
@@ -67,7 +66,8 @@ dependencies {
   testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.3'
 }
 
-tasks.bintrayUpload.dependsOn 'integrationTest'
-tasks.artifactoryPublish.dependsOn 'integrationTest'
+tasks.bintrayUpload.dependsOn 'test'
+tasks.artifactoryPublish.dependsOn 'test'
 tasks.bintrayUpload.onlyIf { !(project.version as String).endsWith('SNAPSHOT') }
 tasks.artifactoryPublish.onlyIf { (project.version as String).endsWith('SNAPSHOT') }
+tasks.test.dependsOn 'jar'

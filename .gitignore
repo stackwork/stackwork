@@ -2,4 +2,5 @@ tmp/
 .idea/
 *.iml
 /build/
+src/test/gradle-projects/*/build/
 .gradle

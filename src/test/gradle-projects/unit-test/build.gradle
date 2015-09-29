@@ -1,0 +1,41 @@
+buildscript {
+  repositories {
+    mavenLocal() // FIXME #19
+    mavenCentral()
+  }
+  dependencies {
+    classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: '0.3-SNAPSHOT'
+  }
+}
+apply plugin: 'groovy'
+apply plugin: 'docker'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile gradleApi()
+  compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.3.6'
+
+  testCompile group: 'junit', name: 'junit', version: '4.11'
+  testCompile group: 'org.glassfish.jersey.core', name:'jersey-client', version:'2.22'
+  testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.3'
+}
+
+tasks.test.doFirst {
+  project.docker.services.each { serviceName, serviceInfo ->
+    serviceInfo.each { infoKey, infoVal ->
+      systemProperties["docker.$serviceName.$infoKey"] = infoVal
+    }
+  }
+}.dependsOn tasks.runDockerCompose
+
+tasks.runDockerCompose.finalizedBy tasks.cleanDockerCompose
+tasks.stopDockerCompose.mustRunAfter tasks.test
+
+task("cleanup", description: 'Inspect and remove the test docker image', type: Exec) {
+  commandLine file('remove-image-by-name-or-id.sh').absolutePath, "${-> project.docker.imageId}"
+}.mustRunAfter tasks.buildImage
+
+tasks.cleanDockerCompose.finalizedBy tasks.cleanup

@@ -6,6 +6,15 @@ plugins {
 }
 apply from: './src/test/gradle-plugins/colored-test-output.gradle'
 
+dependencies {
+  compile gradleApi()
+  compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.3.6'
+  compile group: 'org.yaml', name: 'snakeyaml', version: '1.16'
+
+  testCompile group: 'junit', name: 'junit', version: '4.11'
+  testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.3'
+}
+
 repositories {
   mavenCentral()
 }
@@ -24,7 +33,7 @@ publishing {
   publications {
     nebula(MavenPublication) {
       from components.java
-      groupId 'nl.qkrijger.gradle.docker'
+      groupId 'nl.qkrijger.gradle'
       artifactId 'docker-gradle'
       version project.version
       artifact sourceJar
@@ -58,16 +67,33 @@ artifactory {
   }
 }
 
-dependencies {
-  compile gradleApi()
-  compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.3.6'
-
-  testCompile group: 'junit', name: 'junit', version: '4.11'
-  testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.3'
-}
+// FIXME #19 next two lines
+tasks.test.dependsOn 'jar'
+tasks.test.dependsOn 'publishToMavenLocal'
 
 tasks.bintrayUpload.dependsOn 'test'
 tasks.artifactoryPublish.dependsOn 'test'
-tasks.bintrayUpload.onlyIf { !(project.version as String).endsWith('SNAPSHOT') }
-tasks.artifactoryPublish.onlyIf { (project.version as String).endsWith('SNAPSHOT') }
-tasks.test.dependsOn 'jar'
+
+def travisBranch = System.getenv().get("TRAVIS_BRANCH")
+if (travisBranch ? travisBranch =~ '^master$' : false) {
+  logger.info 'This build is on Travis and the branch is master. Will therefore perform publish tasks for bintray or artifactory.'
+  if ((project.version as String).endsWith('SNAPSHOT')) {
+    logger.info 'This build is a SNAPSHOT build. Will perform Artifactory publish, but not Bintray upload'
+    turnOffBintrayUpload()
+  } else {
+    logger.info 'This build is a release build. Will perform Bintray upload, but not Artifactory publish'
+    turnOffArtifactoryPublish()
+  }
+} else {
+  logger.info 'This build is not on Travis or is not the master branch. Will therefore NOT perform publish tasks for bintray or artifactory.'
+  turnOffBintrayUpload()
+  turnOffArtifactoryPublish()
+}
+
+private turnOffArtifactoryPublish() {
+  tasks.artifactoryPublish.onlyIf { false }
+}
+
+private turnOffBintrayUpload() {
+  tasks.bintrayUpload.onlyIf { false }
+}

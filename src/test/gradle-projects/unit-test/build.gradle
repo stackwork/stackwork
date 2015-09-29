@@ -34,7 +34,7 @@ tasks.test.doFirst {
 tasks.runDockerCompose.finalizedBy tasks.cleanDockerCompose
 tasks.stopDockerCompose.mustRunAfter tasks.test
 
-task("cleanup", description: 'Inspect and remove the test docker image', type: Exec) {
+task('cleanup', description: 'Inspect and remove the test docker image', type: Exec) {
   commandLine file('remove-image-by-name-or-id.sh').absolutePath, "${-> project.docker.imageId}"
 }.mustRunAfter tasks.buildImage
 

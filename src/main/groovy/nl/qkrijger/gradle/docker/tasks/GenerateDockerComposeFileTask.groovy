@@ -5,6 +5,10 @@ import org.gradle.api.tasks.Copy
 class GenerateDockerComposeFileTask extends Copy {
 
   GenerateDockerComposeFileTask() {
+
+    // disable task caching
+    outputs.upToDateWhen {false}
+
     String composeOutputDir = "${project.buildDir}/docker-plugin"
     project.docker.composeFile = "$composeOutputDir/docker-compose.yml"
 

@@ -60,13 +60,14 @@ class DockerPlugin implements Plugin<Project> {
   }
 
   private void evaluateEnvironment() {
-    String dockerHost = System.properties['DOCKER_HOST']
-    if (dockerHost) { // in case of remote connection to docker daemon
+    String dockerHost = System.getenv('DOCKER_HOST')
+    if (dockerHost) {
+      // in case of remote connection to docker daemon
       project.logger.info("DOCKER_HOST system variable with value '$dockerHost' found. Will expose docker " +
               "container forwarded ports and the DOCKER_HOST to the test classes.")
-      // TODO #18: parse the docker host
-      project.docker.host = dockerHost
-    } else { // in case of local docker daemon
+      project.docker.host = new URI(dockerHost).host
+    } else {
+      // in case of local docker daemon
       project.logger.info('No DOCKER_HOST system variable found. Will expose docker container ips and exposed ports' +
               ' to the test classes.')
       project.docker.host = false

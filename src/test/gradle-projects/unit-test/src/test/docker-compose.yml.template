@@ -1,2 +1,4 @@
 service:
   image: ${docker.imageId}
+  ports:
+  - 80

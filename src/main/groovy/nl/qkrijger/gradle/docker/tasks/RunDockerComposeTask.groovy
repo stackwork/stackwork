@@ -20,13 +20,31 @@ class RunDockerComposeTask extends Exec {
         Map<String, Object> serviceInfo = [:]
         String containerId = RunDockerComposeTask.askComposeServicesContainerId(project, serviceName, composeFile)
         Map<String, Object> containerInfo = RunDockerComposeTask.dockerInspectContainer(project, containerId)
-        if (project.docker.host) {
-          // TODO #18: implement the following bash code
-          // forwarded_ports=$(docker inspect --format '{{range $key, $value := .NetworkSettings.Ports }}{{range $port_proto, $forwarded_ports := $value }}{{$forwarded_ports.HostPort}} {{end}}{{end}}' ${container_id})
-          // for forwarded_port in ${forwarded_ports} ; do
-          // echo "${forwarded_port}" > $service_port_file
-          // done
-          // service_host=$(python -c "from urlparse import urlparse; print urlparse('$DOCKER_HOST').hostname")
+
+        String dockerHost = project.docker.host
+
+        if (dockerHost) {
+          containerInfo.NetworkSettings.Ports.each { exposedPortProto, forwardedPorts ->
+
+            if (!forwardedPorts) {
+              project.logger.warn("No port forwarding defined for service '$serviceName'. " +
+                      "No port configuration will be exposed.")
+              return
+            }
+
+            int exposedPort = ((exposedPortProto.toString() =~ /\d+/)[0]).toInteger()
+            if (forwardedPorts.isEmpty()) {
+              project.logger.warn("No forwarded port found for exposed port: '$exposedPort'")
+            } else {
+              if (forwardedPorts.size() > 1) {
+                project.logger.warn("Multiple forwarded ports found for exposed port: '$exposedPort'. " +
+                        "Continuing with a randomly selected port.")
+              }
+              serviceInfo.port = forwardedPorts.first().HostPort
+            }
+
+            serviceInfo.host = dockerHost
+          }
         } else {
           containerInfo.NetworkSettings.Ports.each { exposedPortProto, forwardedPort ->
             int port = ((exposedPortProto.toString() =~ /\d+/)[0]).toInteger()

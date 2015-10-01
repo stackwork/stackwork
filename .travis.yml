@@ -8,7 +8,8 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - docker -v
-  - sudo iptables -N DOCKER
+  # https://github.com/travis-ci/travis-ci/issues/4778
+  - sudo iptables -n --list "DOCKER" >/dev/null 2>&1 || sudo iptables -N DOCKER
 
 language:
   - groovy

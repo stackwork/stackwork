@@ -13,4 +13,4 @@ before_install:
 language:
   - groovy
 
-script: gradle clean check bintrayUpload artifactoryPublish -i
+script: gradle bintrayUpload artifactoryPublish -i

@@ -49,6 +49,16 @@ bintray {
   key = project.bintrayKey ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
 }
 
+artifactory {
+  publish {
+    repository {
+      username = project.bintrayUser ?: System.getenv('BINTRAY_USER')
+      password = project.bintrayKey ?: System.getenv('BINTRAY_KEY')
+    }
+  }
+}
+
+
 uploadArchives {
   repositories {
     mavenDeployer {

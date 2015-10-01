@@ -74,6 +74,7 @@ artifactory {
     repository {
       username = project.bintrayUser ?: System.getenv('BINTRAY_USER')
       password = project.bintrayKey ?: System.getenv('BINTRAY_KEY')
+      maven = true
     }
   }
 }

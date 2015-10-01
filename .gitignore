@@ -7,4 +7,4 @@ src/test/gradle-projects/*/build/
 
 gradlew
 gradlew.bat
-gradle/
+/gradle/

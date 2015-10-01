@@ -21,6 +21,7 @@ class RunDockerComposeTask extends Exec {
         String containerId = RunDockerComposeTask.askComposeServicesContainerId(project, serviceName, composeFile)
         Map<String, Object> containerInfo = RunDockerComposeTask.dockerInspectContainer(project, containerId)
 
+        // dockerHost is null in case of local Docker deamon, or the host to connect to for a remote Docker host
         String dockerHost = project.docker.host
 
         if (dockerHost) {

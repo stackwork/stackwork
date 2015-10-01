@@ -70,7 +70,6 @@ class DockerPlugin implements Plugin<Project> {
       // in case of local docker daemon
       project.logger.info('No DOCKER_HOST system variable found. Will expose docker container ips and exposed ports' +
               ' to the test classes.')
-      project.docker.host = false
     }
   }
 

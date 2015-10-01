@@ -16,6 +16,8 @@ apply from: './src/test/gradle-plugins/colored-test-output.gradle'
 
 group = 'nl.qkrijger.gradle'
 
+project.ext.set('bintrayKey', System.getenv('BINTRAY_KEY'))
+
 contacts {
   'qkrijger@gmail.com' {
     moniker 'Quinten Krijger'
@@ -43,9 +45,6 @@ dependencies {
 repositories {
   jcenter()
 }
-
-project.bintrayUser = System.getenv('BINTRAY_USER')
-project.bintrayKey = System.getenv('BINTRAY_KEY')
 
 uploadArchives {
   repositories {

@@ -44,7 +44,7 @@ publishing {
   publications {
     nebula(MavenPublication) {
       from components.java
-      groupId 'nl.qkrijger.gradle'
+      groupId 'nl.qkrijger.gradle.docker'
       artifactId 'docker-gradle'
       version project.version
       artifact sourceJar

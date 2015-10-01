@@ -8,6 +8,7 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - docker -v
+  - sudo iptables -N DOCKER
 
 language:
   - groovy

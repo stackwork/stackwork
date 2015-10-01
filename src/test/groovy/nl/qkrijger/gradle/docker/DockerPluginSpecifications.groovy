@@ -4,6 +4,8 @@ import spock.lang.Specification
 
 class DockerPluginSpecifications extends Specification {
 
+  static final boolean NO_STACKTRACE = false
+
   def setup() {
     println '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> STARTING CHILD GRADLE TEST BUILD <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
   }
@@ -38,7 +40,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "Tagging an image does not work if the project.version is not set"() {
     when:
-    GradleOutput output = runGradleTask('tagImage', 'tag-no-version')
+    GradleOutput output = runGradleTask('tagImage', 'tag-no-version', NO_STACKTRACE)
 
     then:
     output.process.exitValue() != 0
@@ -47,7 +49,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "Tagging an image does not work if the docker.imageName is not set"() {
     when:
-    GradleOutput output = runGradleTask('tagImage', 'tag-no-image-name')
+    GradleOutput output = runGradleTask('tagImage', 'tag-no-image-name', NO_STACKTRACE)
 
     then:
     output.process.exitValue() != 0
@@ -56,15 +58,15 @@ class DockerPluginSpecifications extends Specification {
 
   def "The push image task tries to push an image."() {
     when:
-    GradleOutput output = runGradleTask('pushImage', 'push-public-hub-no-namespace')
+    GradleOutput output = runGradleTask('pushImage', 'push-public-hub-no-namespace', NO_STACKTRACE)
 
     then:
     output.process.exitValue() != 0
     output.standardErr.contains 'You cannot push a "root" repository. Please rename your repository to <user>/<repo>'
   }
 
-  private static GradleOutput runGradleTask(String task, String project) {
-    def proc = "gradle $task -i --stacktrace --project-dir src/test/gradle-projects/$project".execute()
+  private static GradleOutput runGradleTask(String task, String project, boolean printStacktrace = true) {
+    def proc = "gradle $task -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()
     OutputStream standardErr = new ByteArrayOutputStream()
     proc.waitForProcessOutput(standardOut, standardErr)

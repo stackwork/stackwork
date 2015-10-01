@@ -19,6 +19,17 @@ repositories {
   mavenCentral()
 }
 
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      repository(url: "file://${project.buildDir}/repoForTests")
+      pom.artifactId = 'docker-gradle'
+      pom.groupId = 'nl.qkrijger.gradle'
+      pom.version = '0.1-TEST'
+    }
+  }
+}
+
 task('sourceJar', type: Jar) {
   classifier = 'sources'
   from project.sourceSets.main.allSource
@@ -67,9 +78,7 @@ artifactory {
   }
 }
 
-// FIXME #19 next two lines
-tasks.test.dependsOn 'jar'
-tasks.test.dependsOn 'publishToMavenLocal'
+tasks.test.dependsOn tasks.uploadArchives
 
 tasks.bintrayUpload.dependsOn 'test'
 tasks.artifactoryPublish.dependsOn 'test'

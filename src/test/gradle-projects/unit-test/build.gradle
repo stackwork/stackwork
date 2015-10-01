@@ -1,10 +1,10 @@
 buildscript {
   repositories {
-    mavenLocal() // FIXME #19
+    maven { url = "file://${project.projectDir}/../../../../build/repoForTests" }
     mavenCentral()
   }
   dependencies {
-    classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: '0.3-SNAPSHOT'
+    classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: '0.1-TEST'
   }
 }
 apply plugin: 'groovy'

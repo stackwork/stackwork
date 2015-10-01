@@ -1,9 +1,12 @@
 buildscript {
+  repositories {
+    maven { url = "file://${project.projectDir}/../../../../build/repoForTests" }
+    mavenCentral()
+  }
   dependencies {
-    classpath fileTree(dir: '../../../../build/libs')
+    classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: '0.1-TEST'
   }
 }
-
 apply plugin: 'docker'
 
 docker.imageName = 'my-image'

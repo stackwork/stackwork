@@ -31,6 +31,7 @@ class DockerPlugin implements Plugin<Project> {
     evaluateEnvironment()
     exportShellScripts()
 
+    project.extensions.create("docker", DockerExtension, project)
     registerTasks()
   }
 

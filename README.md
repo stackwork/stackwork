@@ -47,6 +47,18 @@ Clean up after yourself, also in case of failing tests by:
     tasks.runDockerCompose.finalizedBy tasks.cleanDockerCompose
     tasks.stopDockerCompose.mustRunAfter tasks.test
 
+### Running without stopping containers
+
+The plugin can be instructed to keep containers running after tests have been executed. To enable this behaviour
+include the following configuration block in your build script:
+
+    docker {
+      stopContainers = false
+    }
+    
+This will ensure that `StopDockerComposeTask` and subsequents clean-up tasks won't run. The feature is especially
+useful when running on build services like Travis that, for security reasons, prevent containers from being stopped.
+
 ## Features
 
 ### Gradle docker object (runtime data)

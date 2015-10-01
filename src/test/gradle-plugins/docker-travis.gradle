@@ -1,0 +1,8 @@
+apply plugin: 'docker'
+
+def travisBuild = System.getenv('TRAVIS_BRANCH') != null
+logger.info "Running on Travis: '$travisBuild'"
+
+docker{
+  stopContainers = !travisBuild
+}

@@ -6,6 +6,9 @@ class BuildImageTask extends Exec {
 
   BuildImageTask() {
 
+    description = 'Builds the Dockerfile in your project root folder.'
+    group = 'Docker'
+
     commandLine 'sh', project.file('.gradle/docker/build.sh').absolutePath, project.projectDir
 
     def buffer = new ByteArrayOutputStream()

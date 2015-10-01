@@ -6,6 +6,10 @@ import org.gradle.api.tasks.Exec
 class TagImageTask extends Exec {
 
   TagImageTask() {
+
+    description = 'Tag the built during "buildImage" with the docker.imageName and project.version.'
+    group = 'Docker'
+
     doFirst {
       if (project.version == Project.DEFAULT_VERSION) {
         throw new IllegalStateException('No project version defined. Cannot tag image. Please set "project.version".')

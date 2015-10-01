@@ -6,6 +6,10 @@ import org.gradle.api.tasks.Exec
 class PushImageTask extends Exec {
 
   PushImageTask() {
+
+    description = 'Push the image tagged during "tagImage"'
+    group = 'Docker'
+
     doFirst {
       if (project.version == Project.DEFAULT_VERSION) {
         throw new IllegalStateException('No project version defined. Cannot tag image. Please set "project.version".')

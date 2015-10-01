@@ -27,36 +27,11 @@ class DockerPlugin implements Plugin<Project> {
 
     project.ext.docker = [:]
     project.docker.services = [:]
-    evaluateEnvironment()
 
+    evaluateEnvironment()
     exportShellScripts()
 
-    project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask) {
-      description = 'Builds the Dockerfile in your project root folder.'
-      group = 'Docker'
-    }
-
-    project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask) {
-      description = 'Tag the built during "buildImage" with the docker.imageName and project.version.'
-      group = 'Docker'
-    }.dependsOn BUILD_IMAGE_TASK_NAME
-
-    project.task(PUSH_IMAGE_TASK_NAME, type: PushImageTask) {
-      description = 'Push the image tagged during "tagImage"'
-      group = 'Docker'
-    }.dependsOn TAG_IMAGE_TASK_NAME
-
-    project.task(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME, type: GenerateDockerComposeFileTask)
-            .dependsOn BUILD_IMAGE_TASK_NAME
-
-    project.task(RUN_DOCKER_COMPOSE_TASK_NAME, type: RunDockerComposeTask)
-            .dependsOn GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME
-
-    project.task(STOP_DOCKER_COMPOSE_TASK_NAME, type: StopDockerComposeTask)
-            .dependsOn RUN_DOCKER_COMPOSE_TASK_NAME
-
-    project.task(CLEAN_DOCKER_COMPOSE_TASK_NAME, type: CleanDockerComposeTask)
-            .dependsOn STOP_DOCKER_COMPOSE_TASK_NAME
+    registerTasks()
   }
 
   private void evaluateEnvironment() {
@@ -83,6 +58,26 @@ class DockerPlugin implements Plugin<Project> {
       def destination = targetCache.resolve(script)
       Files.copy source, destination, StandardCopyOption.REPLACE_EXISTING
     }
+  }
+
+  private void registerTasks(){
+    project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask)
+
+    project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask).dependsOn BUILD_IMAGE_TASK_NAME
+
+    project.task(PUSH_IMAGE_TASK_NAME, type: PushImageTask).dependsOn TAG_IMAGE_TASK_NAME
+
+    project.task(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME, type: GenerateDockerComposeFileTask)
+            .dependsOn BUILD_IMAGE_TASK_NAME
+
+    project.task(RUN_DOCKER_COMPOSE_TASK_NAME, type: RunDockerComposeTask)
+            .dependsOn GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME
+
+    project.task(STOP_DOCKER_COMPOSE_TASK_NAME, type: StopDockerComposeTask)
+            .dependsOn RUN_DOCKER_COMPOSE_TASK_NAME
+
+    project.task(CLEAN_DOCKER_COMPOSE_TASK_NAME, type: CleanDockerComposeTask)
+            .dependsOn STOP_DOCKER_COMPOSE_TASK_NAME
   }
 
 }

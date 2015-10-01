@@ -139,4 +139,4 @@ The plugin is currently released to [Bintray][bt], while snapshots are pushed to
 
 [bt]: https://bintray.com/qkrijger/gradle-plugins/docker-gradle
 [jf]: https://oss.jfrog.org
-[jfb]: https://oss.jfrog.org/artifactory/webapp/#/builds/gradle-docker
+[jfb]: https://oss.jfrog.org/artifactory/webapp/#/builds/docker-gradle

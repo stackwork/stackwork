@@ -4,7 +4,3 @@ tmp/
 /build/
 src/test/gradle-projects/*/build/
 .gradle
-
-gradlew
-gradlew.bat
-/gradle/

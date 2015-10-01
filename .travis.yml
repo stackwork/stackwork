@@ -14,4 +14,4 @@ before_install:
 language:
   - groovy
 
-script: gradle bintrayUpload artifactoryPublish -i
+script: ./gradlew snapshot -i

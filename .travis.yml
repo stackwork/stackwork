@@ -14,4 +14,4 @@ before_install:
 language:
   - groovy
 
-script: ./gradlew snapshot -i
+script: ./gradlew -Prelease.travisci=true snapshot -i

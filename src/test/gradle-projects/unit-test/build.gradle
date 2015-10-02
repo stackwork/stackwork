@@ -7,12 +7,7 @@ buildscript {
     classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: '0.1-TEST'
   }
 }
-apply plugin: 'groovy'
-apply from: '../../gradle-plugins/docker-travis.gradle'
-
-repositories {
-  mavenCentral()
-}
+apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
 
 dependencies {
   compile gradleApi()
@@ -30,9 +25,4 @@ tasks.test.doFirst {
     }
   }
 }.dependsOn tasks.runDockerCompose
-
-task('cleanup', description: 'Inspect and remove the test docker image', type: Exec) {
-  commandLine file('remove-image-by-name-or-id.sh').absolutePath, "${-> project.docker.imageId}"
-}.dependsOn(tasks.cleanDockerCompose).onlyIf {docker.stopContainers}
-
-tasks.check.finalizedBy tasks.cleanup
+tasks.stopDockerCompose.mustRunAfter tasks.test

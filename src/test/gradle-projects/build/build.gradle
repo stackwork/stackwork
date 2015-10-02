@@ -7,10 +7,11 @@ buildscript {
     classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: '0.1-TEST'
   }
 }
-apply plugin: 'docker'
+apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
 
-task("assertAndCleanup", description: 'Inspect and remove the test docker image', type: Exec) {
-  commandLine file('inspect-and-remove.sh').absolutePath, "${-> project.docker.imageId}"
-}.mustRunAfter tasks.buildImage
+task('inspectImage', description: 'Inspect the image. If this works, we know it has been built.', type: Exec) {
+  commandLine 'docker', 'inspect', "${-> project.docker.imageId}"
+}
 
-tasks.buildImage.finalizedBy tasks.assertAndCleanup
+tasks.buildImage.finalizedBy tasks.inspectImage
+tasks.cleanup.mustRunAfter tasks.inspectImage

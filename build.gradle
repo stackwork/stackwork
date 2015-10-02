@@ -3,20 +3,23 @@ buildscript { repositories { jcenter() } } // Some plugin dependencies (namely J
 plugins {
   id 'groovy'
   id 'maven'
+
   id 'nebula.info' version '2.2.4'
   id 'nebula.contacts' version '2.2.0'
+  id 'nebula.maven-apache-license' version '4.0.1'
+
   id 'nebula.javadoc-jar' version '4.0.1'
   id 'nebula.source-jar' version '4.0.1'
-  id 'nebula.maven-apache-license' version '4.0.1'
-  id 'nebula.maven-publish' version '4.2.1'
+
   id 'nebula.nebula-release' version '3.0.2'
+
+//  id 'nebula.maven-publish' version '4.2.1'
   id 'nebula.nebula-bintray' version '3.1.0'
+
 }
 apply from: './src/test/gradle-plugins/colored-test-output.gradle'
 
 group = 'nl.qkrijger.gradle'
-
-project.ext.set('bintrayKey', System.getenv('BINTRAY_KEY'))
 
 contacts {
   'qkrijger@gmail.com' {

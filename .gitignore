@@ -4,3 +4,6 @@ tmp/
 /build/
 src/test/gradle-projects/*/build/
 .gradle
+
+# only commit the encrypted version of the gradle properties
+gradle.properties

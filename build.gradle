@@ -50,10 +50,10 @@ repositories {
 
 bintray {
   pkg {
+    userOrg = 'qkrijger'
     repo = 'gradle-plugins'
     name = 'docker-gradle'
     desc = project.description
-    userOrg = 'qkrijger'
     licenses = ['Apache-2.0']
     vcsUrl = 'https://github.com/Krijger/docker-gradle.git'
     websiteUrl = 'https://github.com/Krijger/docker-gradle'

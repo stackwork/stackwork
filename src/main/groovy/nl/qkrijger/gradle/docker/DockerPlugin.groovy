@@ -2,16 +2,17 @@ package nl.qkrijger.gradle.docker
 import nl.qkrijger.gradle.docker.tasks.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin
 
 class DockerPlugin implements Plugin<Project> {
 
-  private static final String BUILD_IMAGE_TASK_NAME = 'buildImage'
-  private static final String GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME = 'generateDockerComposeFile'
-  private static final String RUN_DOCKER_COMPOSE_TASK_NAME = 'runDockerCompose'
-  private static final String STOP_DOCKER_COMPOSE_TASK_NAME = 'stopDockerCompose'
-  private static final String CLEAN_DOCKER_COMPOSE_TASK_NAME = 'cleanDockerCompose'
-  private static final String TAG_IMAGE_TASK_NAME = 'tagImage'
-  private static final String PUSH_IMAGE_TASK_NAME = 'pushImage'
+  public static final String BUILD_IMAGE_TASK_NAME = 'buildImage'
+  public static final String GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME = 'generateDockerComposeFile'
+  public static final String RUN_DOCKER_COMPOSE_TASK_NAME = 'runDockerCompose'
+  public static final String STOP_DOCKER_COMPOSE_TASK_NAME = 'stopDockerCompose'
+  public static final String CLEAN_DOCKER_COMPOSE_TASK_NAME = 'cleanDockerCompose'
+  public static final String TAG_IMAGE_TASK_NAME = 'tagImage'
+  public static final String PUSH_IMAGE_TASK_NAME = 'pushImage'
 
   private Project project
 
@@ -27,6 +28,10 @@ class DockerPlugin implements Plugin<Project> {
 
     project.extensions.create('docker', DockerExtension, project)
     registerTasks()
+
+    project.plugins.withType(JavaPlugin) {
+      project.plugins.apply(DockerJavaPlugin)
+    }
   }
 
   private void evaluateEnvironment() {
@@ -43,12 +48,14 @@ class DockerPlugin implements Plugin<Project> {
     }
   }
 
-  private void registerTasks(){
+  private void registerTasks() {
     project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask)
 
-    project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask).dependsOn BUILD_IMAGE_TASK_NAME
+    project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask)
+            .dependsOn BUILD_IMAGE_TASK_NAME
 
-    project.task(PUSH_IMAGE_TASK_NAME, type: PushImageTask).dependsOn TAG_IMAGE_TASK_NAME
+    project.task(PUSH_IMAGE_TASK_NAME, type: PushImageTask)
+            .dependsOn TAG_IMAGE_TASK_NAME
 
     project.task(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME, type: GenerateDockerComposeFileTask)
             .dependsOn BUILD_IMAGE_TASK_NAME

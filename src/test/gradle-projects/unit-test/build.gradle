@@ -17,12 +17,3 @@ dependencies {
   testCompile group: 'org.glassfish.jersey.core', name:'jersey-client', version:'2.22'
   testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.3'
 }
-
-tasks.test.doFirst {
-  project.docker.services.each { serviceName, serviceInfo ->
-    serviceInfo.each { infoKey, infoVal ->
-      systemProperties["docker.$serviceName.$infoKey"] = infoVal
-    }
-  }
-}.dependsOn tasks.runDockerCompose
-tasks.stopDockerCompose.mustRunAfter tasks.test

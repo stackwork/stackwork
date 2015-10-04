@@ -16,10 +16,8 @@ task('cleanup', description: 'Remove the test docker image by id, even when it i
   commandLine 'docker', 'rmi', "${-> project.docker.imageId}"
 }.onlyIf { extensions.docker.stopContainers }
 
-tasks.buildImage.finalizedBy tasks.cleanup
-tasks.runDockerCompose.finalizedBy tasks.cleanDockerCompose
-// different test cases call different tasks. Cleanup will run as soon as buildImage is used, but it should happen
-// after a test task dependent on the image existing has run
+tasks.cleanup.mustRunAfter tasks.test
 tasks.matching({ task -> task.group == 'Docker' }).each { dockerTask ->
   tasks.cleanup.mustRunAfter dockerTask
 }
+tasks.check.dependsOn tasks.cleanup

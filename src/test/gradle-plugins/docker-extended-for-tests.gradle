@@ -20,5 +20,6 @@ tasks.buildImage.finalizedBy tasks.cleanup
 tasks.runDockerCompose.finalizedBy tasks.cleanDockerCompose
 // different test cases call different tasks. Cleanup will run as soon as buildImage is used, but it should happen
 // after a test task dependent on the image existing has run
-tasks.cleanup.mustRunAfter tasks.check, tasks.tagImage, tasks.pushImage
-tasks.cleanup.mustRunAfter tasks.runDockerCompose, tasks.stopDockerCompose, tasks.cleanDockerCompose
+tasks.matching({ task -> task.group == 'Docker' }).each { dockerTask ->
+  tasks.cleanup.mustRunAfter dockerTask
+}

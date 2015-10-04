@@ -9,7 +9,7 @@ class BuildImageTask extends Exec {
     description = 'Builds the Dockerfile in your project root folder.'
     group = 'Docker'
 
-    commandLine 'sh', project.file('.gradle/docker/build.sh').absolutePath, project.projectDir
+    commandLine 'docker', 'build', project.projectDir
 
     def buffer = new ByteArrayOutputStream()
     setStandardOutput buffer
@@ -18,7 +18,7 @@ class BuildImageTask extends Exec {
       def output = buffer.toString('UTF-8')
       def imageIdMatcher = (output =~ /(?s).*Successfully built (?<imageId>[0-9a-f]+).*/)
 
-      if(!imageIdMatcher.matches()) {
+      if (!imageIdMatcher.matches()) {
         throw new IllegalStateException('Failed to parse an image id from the Docker build response')
       }
 

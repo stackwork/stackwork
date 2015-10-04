@@ -3,11 +3,6 @@ import nl.qkrijger.gradle.docker.tasks.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
-
 class DockerPlugin implements Plugin<Project> {
 
   private static final String BUILD_IMAGE_TASK_NAME = 'buildImage'
@@ -29,7 +24,6 @@ class DockerPlugin implements Plugin<Project> {
     project.docker.services = [:]
 
     evaluateEnvironment()
-    exportShellScripts()
 
     project.extensions.create('docker', DockerExtension, project)
     registerTasks()
@@ -46,18 +40,6 @@ class DockerPlugin implements Plugin<Project> {
       // in case of local docker daemon
       project.logger.info('No DOCKER_HOST system variable found. Will expose docker container ips and exposed ports' +
               ' to the test classes.')
-    }
-  }
-
-  private void exportShellScripts() {
-    Path targetCache = Files.createDirectories(Paths.get(project.file('.gradle/docker').absolutePath))
-
-    def scripts = ['build.sh']
-
-    scripts.each { script ->
-      def source = getClass().getResourceAsStream("/docker/$script")
-      def destination = targetCache.resolve(script)
-      Files.copy source, destination, StandardCopyOption.REPLACE_EXISTING
     }
   }
 

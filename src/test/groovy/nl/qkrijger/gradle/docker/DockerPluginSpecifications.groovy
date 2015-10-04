@@ -24,7 +24,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "The prepare image test task allows to connect to an image in unit test by setting appropriate system properties"() {
     when:
-    GradleOutput output = runGradleTask('clean test', 'unit-test')
+    GradleOutput output = runGradleTask('clean check', 'unit-test')
 
     then:
     output.process.exitValue() == 0

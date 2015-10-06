@@ -1,8 +1,13 @@
 package nl.qkrijger.gradle.docker
+
 import nl.qkrijger.gradle.docker.tasks.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPlugin
+
+import static nl.qkrijger.gradle.docker.DockerModuleType.TEST
+import static nl.qkrijger.gradle.docker.DockerModuleType.TEST_IMAGE
 
 class DockerPlugin implements Plugin<Project> {
 
@@ -13,16 +18,20 @@ class DockerPlugin implements Plugin<Project> {
   public static final String CLEAN_DOCKER_COMPOSE_TASK_NAME = 'cleanDockerCompose'
   public static final String TAG_IMAGE_TASK_NAME = 'tagImage'
   public static final String PUSH_IMAGE_TASK_NAME = 'pushImage'
+  public static final String RUN_TEST_IMAGE_TASK_NAME = 'runTestImage'
 
   private Project project
+  private boolean isRootProject
 
   @Override
   void apply(Project project) {
 
     this.project = project
+    this.isRootProject = project.rootProject == project
 
     project.ext.docker = [:]
     project.docker.services = [:]
+    project.docker.modules = [:]
 
     evaluateEnvironment()
 
@@ -31,6 +40,19 @@ class DockerPlugin implements Plugin<Project> {
 
     project.plugins.withType(JavaPlugin) {
       project.plugins.apply(DockerJavaPlugin)
+    }
+
+    project.afterEvaluate {
+      if (project.parent && project.hasProperty('dockerModuleType')) {
+        project.parent.docker.modules["${project.name}"] = project.dockerModuleType
+      }
+      createTaskOrdering()
+      if (!project.plugins.hasPlugin(JavaPlugin)) {
+        project.task('check') {
+          description: 'Check task added by Docker Plugin (apparently, the JavaPlugin was not loaded in this project)'
+        }
+      }
+      integrateWithCheckTask()
     }
   }
 
@@ -50,24 +72,54 @@ class DockerPlugin implements Plugin<Project> {
 
   private void registerTasks() {
     project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask)
+            .onlyIf { isRootProject || isModuleType(TEST_IMAGE) }
 
     project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask)
-            .dependsOn BUILD_IMAGE_TASK_NAME
+            .dependsOn(BUILD_IMAGE_TASK_NAME)
+            .onlyIf { isRootProject }
 
     project.task(PUSH_IMAGE_TASK_NAME, type: PushImageTask)
-            .dependsOn TAG_IMAGE_TASK_NAME
+            .dependsOn(TAG_IMAGE_TASK_NAME)
+            .onlyIf { isRootProject }
 
     project.task(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME, type: GenerateDockerComposeFileTask)
-            .dependsOn BUILD_IMAGE_TASK_NAME
+            .dependsOn(BUILD_IMAGE_TASK_NAME)
+            .onlyIf { isModuleType(TEST_IMAGE) || isModuleType(TEST) }
 
     project.task(RUN_DOCKER_COMPOSE_TASK_NAME, type: RunDockerComposeTask)
-            .dependsOn GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME
+            .dependsOn(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME)
+            .onlyIf { isModuleType(TEST_IMAGE) || isModuleType(TEST) }
 
     project.task(STOP_DOCKER_COMPOSE_TASK_NAME, type: StopDockerComposeTask)
-            .dependsOn RUN_DOCKER_COMPOSE_TASK_NAME
+            .dependsOn(RUN_DOCKER_COMPOSE_TASK_NAME)
+            .onlyIf { isModuleType(TEST_IMAGE) || isModuleType(TEST) }
 
     project.task(CLEAN_DOCKER_COMPOSE_TASK_NAME, type: CleanDockerComposeTask)
-            .dependsOn STOP_DOCKER_COMPOSE_TASK_NAME
+            .dependsOn(STOP_DOCKER_COMPOSE_TASK_NAME)
+            .onlyIf { isModuleType(TEST_IMAGE) || isModuleType(TEST) }
+
+    project.task(RUN_TEST_IMAGE_TASK_NAME, type: RunTestImageTask)
+            .dependsOn(BUILD_IMAGE_TASK_NAME)
+            .dependsOn(RUN_DOCKER_COMPOSE_TASK_NAME)
+            .onlyIf { isModuleType(TEST_IMAGE) }
+
+    project.tasks.getByName(STOP_DOCKER_COMPOSE_TASK_NAME)
+            .mustRunAfter(RUN_TEST_IMAGE_TASK_NAME)
+
+  }
+
+  private void createTaskOrdering() {
+    Project parentOrSelf = project.parent ?: project
+    project.tasks.getByName(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME)
+            .dependsOn parentOrSelf.getTasksByName(BUILD_IMAGE_TASK_NAME, true)
+  }
+
+  private Task integrateWithCheckTask() {
+    project.tasks.check.dependsOn RUN_TEST_IMAGE_TASK_NAME, CLEAN_DOCKER_COMPOSE_TASK_NAME
+  }
+
+  private boolean isModuleType(DockerModuleType moduleType) {
+    project.hasProperty('dockerModuleType') && project.dockerModuleType == moduleType.value
   }
 
 }

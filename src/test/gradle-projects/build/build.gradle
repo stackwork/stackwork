@@ -9,9 +9,14 @@ buildscript {
 }
 apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
 
-task('inspectImage', description: 'Inspect the image. If this works, we know it has been built.', type: Exec) {
-  commandLine 'docker', 'inspect', "${-> project.docker.imageId}"
+task('inspectImage',
+        description: 'Inspect the image. If this works, we know it has been built.',
+        group: 'Docker',
+        type: Exec) {
+  commandLine 'docker', 'inspect', '--format=\'{{.Id}}\'', "${-> project.docker.imageId}"
 }
 
-tasks.buildImage.finalizedBy tasks.inspectImage
-tasks.cleanup.mustRunAfter tasks.inspectImage
+tasks.inspectImage.dependsOn tasks.buildImage
+afterEvaluate {
+  tasks.check.dependsOn tasks.inspectImage
+}

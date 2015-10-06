@@ -1,39 +1,61 @@
 package nl.qkrijger.gradle.docker.tasks
-import org.gradle.api.Project
-import org.gradle.api.tasks.Exec
+
+import org.gradle.api.internal.AbstractTask
 import org.yaml.snakeyaml.Yaml
 
-class RunDockerComposeTask extends Exec {
+class RunDockerComposeTask extends AbstractTask {
+
+  Map<String, Object> composeInfo
+  List<String> longRunningServices
+  String composeFile = project.docker.composeFile
 
   RunDockerComposeTask() {
     description = 'Runs the generated docker compose file.'
     group = 'Docker'
 
-    String composeFile = project.docker.composeFile
+    doLast {
+      composeInfo = (Map<String, Object>) new Yaml().load(project.file(composeFile).text)
 
-    commandLine 'docker-compose', '-f', composeFile, 'up', '-d'
+      List<String> allServices = new ArrayList<>()
+      allServices.addAll(composeInfo.keySet())
+
+      List<List<String>> splitServices = allServices.split { this.isExecutableImage(it) }
+      project.logger.info 'The following docker compose services were found to be executable: {}', splitServices[0]
+      longRunningServices = splitServices[1]
+      project.logger.info 'The following docker compose services were found to be long-running: {}', longRunningServices
+      if (longRunningServices.empty) {
+        throw new IllegalStateException('No long-running service defined in docker compose file')
+      }
+    }
+
+    doLast {
+      String composeProject = createRandomString()
+      project.docker.composeProject = composeProject
+
+      project.exec {
+        setCommandLine(['docker-compose', '-f', composeFile, '-p', composeProject,
+                        'up', '-d', *(this.longRunningServices)])
+      }
+    }
 
     // write the services ports and hosts
     doLast {
-      Map<String, Object> compose = (Map<String, Object>) new Yaml().load(project.file(composeFile).text);
-      compose.each { String serviceName, Object serviceConfiguration ->
+      longRunningServices.each { String serviceName ->
         Map<String, Object> serviceInfo = [:]
-        String containerId = RunDockerComposeTask.askComposeServicesContainerId(project, serviceName, composeFile)
-        Map<String, Object> containerInfo = RunDockerComposeTask.dockerInspectContainer(project, containerId)
+        String containerId = this.askComposeServicesContainerId(serviceName)
+        Map<String, Object> containerInfo = this.dockerInspectContainer(containerId)
 
         // dockerHost is null in case of local Docker deamon, or the host to connect to for a remote Docker host
-        String dockerHost = project.docker.host
 
-        if (dockerHost) {
-          containerInfo.NetworkSettings.Ports.each { exposedPortProto, forwardedPorts ->
+        containerInfo.NetworkSettings.Ports.each { String exposedPortProto, forwardedPorts ->
+          int exposedPort = (exposedPortProto =~ /\d+/)[0] as int
 
+          if (project.docker.host) {
             if (!forwardedPorts) {
               project.logger.warn("No port forwarding defined for service '$serviceName'. " +
                       "No port configuration will be exposed.")
               return
             }
-
-            int exposedPort = ((exposedPortProto.toString() =~ /\d+/)[0]).toInteger()
             if (forwardedPorts.isEmpty()) {
               project.logger.warn("No forwarded port found for exposed port: '$exposedPort'")
             } else {
@@ -43,16 +65,12 @@ class RunDockerComposeTask extends Exec {
               }
               serviceInfo.port = forwardedPorts.first().HostPort
             }
-
-            serviceInfo.host = dockerHost
+            serviceInfo.host = project.docker.host
+          } else {
+            serviceInfo.port = exposedPort
+            serviceInfo["port.${exposedPort}"] = exposedPort
+            serviceInfo.host = containerInfo.NetworkSettings.IPAddress
           }
-        } else {
-          containerInfo.NetworkSettings.Ports.each { exposedPortProto, forwardedPort ->
-            int port = ((exposedPortProto.toString() =~ /\d+/)[0]).toInteger()
-            serviceInfo.port = port
-            serviceInfo["port.$port"] = port
-          }
-          serviceInfo.host = containerInfo.NetworkSettings.IPAddress
         }
         project.docker.services["$serviceName"] = serviceInfo
         println "Setting docker.services.$serviceName: $serviceInfo"
@@ -60,16 +78,32 @@ class RunDockerComposeTask extends Exec {
     }
   }
 
-  private static String askComposeServicesContainerId(Project project, String service, String composeFile) {
+  String createRandomString() {
+    def pool = ['A'..'Z', 0..9].flatten()
+    Random rand = new Random(System.currentTimeMillis())
+    def passChars = (0..8).collect { pool[rand.nextInt(pool.size())] }
+    passChars.join()
+  }
+
+  boolean isExecutableImage(String serviceName) {
+    boolean serviceImageIsBuiltInModule = project.parent.docker.modules["$serviceName"]
+    if (!serviceImageIsBuiltInModule) return false
+
+    def moduleType = project.parent.docker.modules["$serviceName"]
+    moduleType.equals('test-image')
+  }
+
+  String askComposeServicesContainerId(String serviceName) {
     OutputStream os = new ByteArrayOutputStream()
     project.exec {
-      setCommandLine(['docker-compose', '-f', composeFile, 'ps', '-q', service])
+      setCommandLine(['docker-compose', '-f', this.composeFile, '-p', project.docker.composeProject,
+                      'ps', '-q', serviceName])
       setStandardOutput(os)
     }
     os.toString().trim()
   }
 
-  private static Map<String, Object> dockerInspectContainer(Project project, String containerId) {
+  Map<String, Object> dockerInspectContainer(String containerId) {
     OutputStream containerInfoOS = new ByteArrayOutputStream()
     project.exec {
       setCommandLine(['docker', 'inspect', containerId])

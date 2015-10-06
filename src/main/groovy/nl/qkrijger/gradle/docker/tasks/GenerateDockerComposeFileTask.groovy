@@ -15,7 +15,7 @@ class GenerateDockerComposeFileTask extends Copy {
     group = 'Docker'
     description = 'Generates the Docker Compose file'
 
-    from 'src/test/'
+    from project.projectDir
     into composeOutputDir
     include 'docker-compose.yml.template'
     rename { file -> 'docker-compose.yml' }

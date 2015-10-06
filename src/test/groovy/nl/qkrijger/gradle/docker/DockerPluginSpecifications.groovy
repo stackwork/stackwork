@@ -16,13 +16,13 @@ class DockerPluginSpecifications extends Specification {
 
   def "The build image task builds the DockerFile in the project root"() {
     when:
-    GradleOutput output = runGradleTask('buildImage', 'build')
+    GradleOutput output = runGradleTask('clean check', 'build')
 
     then:
     output.process.exitValue() == 0
   }
 
-  def "The prepare image test task allows to connect to an image in unit test by setting appropriate system properties"() {
+  def "A test module that applies the JavaPlugin is allowed to connect to an image in unit tests trough appropriately set system properties"() {
     when:
     GradleOutput output = runGradleTask('clean check', 'unit-test')
 
@@ -63,6 +63,24 @@ class DockerPluginSpecifications extends Specification {
     then:
     output.process.exitValue() != 0
     output.standardErr.contains 'You cannot push a "root" repository. Please rename your repository to <user>/<repo>'
+  }
+
+  def 'The runTestImage task runs the test image built in a test-image module against the docker compose setup'() {
+    when:
+    GradleOutput output = runGradleTask('clean check', 'test-image')
+
+    then:
+    output.process.exitValue() == 0
+    output.standardOut.contains 'Serving frontend'
+  }
+
+  def 'A test image designed to fail should fail the test, and thus the build'() {
+    when:
+    GradleOutput output = runGradleTask('clean check', 'test-image-failing-test', NO_STACKTRACE)
+
+    then:
+    output.process.exitValue() == 1
+    output.standardErr.contains 'not.the.correct.domain'
   }
 
   private static GradleOutput runGradleTask(String task, String project, boolean printStacktrace = true) {

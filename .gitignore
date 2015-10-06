@@ -3,6 +3,7 @@ tmp/
 *.iml
 /build/
 src/test/gradle-projects/*/build/
+src/test/gradle-projects/*/*/build/
 .gradle
 
 # only commit the encrypted version of the gradle properties

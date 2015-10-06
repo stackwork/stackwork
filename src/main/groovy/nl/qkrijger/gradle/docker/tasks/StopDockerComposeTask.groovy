@@ -10,11 +10,11 @@ class StopDockerComposeTask extends Exec {
     group = 'Docker'
 
     onlyIf {
-      DockerExtension extension = project.extensions.getByType(DockerExtension)
+      DockerExtension extension = project.rootProject.extensions.getByType(DockerExtension)
       extension.stopContainers
     }
 
-    commandLine 'docker-compose', '-f', project.docker.composeFile, 'stop'
+    commandLine 'docker-compose', '-f', project.docker.composeFile, '-p', project.docker.composeProject, 'stop'
   }
 
 }

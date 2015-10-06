@@ -11,8 +11,13 @@ class DockerJavaPlugin implements Plugin<Project> {
 
     def runDockerComposeTask = project.tasks.getByName(DockerPlugin.RUN_DOCKER_COMPOSE_TASK_NAME)
     def stopDockerComposeTask = project.tasks.getByName(DockerPlugin.STOP_DOCKER_COMPOSE_TASK_NAME)
-    def cleanDockerComposeTask = project.tasks.getByName(DockerPlugin.CLEAN_DOCKER_COMPOSE_TASK_NAME)
     def testTask = project.tasks.test
+
+    project.afterEvaluate {
+      if (project.dockerModuleType == 'test' && !project.parent) {
+        throw new IllegalArgumentException('The root project is not allowed to be a docker module')
+      }
+    }
 
     testTask.doFirst {
       project.logger.info 'Loading docker service information into the JVM as system properties'
@@ -27,8 +32,6 @@ class DockerJavaPlugin implements Plugin<Project> {
 
     testTask.dependsOn runDockerComposeTask
     stopDockerComposeTask.mustRunAfter testTask
-
-    project.tasks.check.dependsOn cleanDockerComposeTask
   }
 
 }

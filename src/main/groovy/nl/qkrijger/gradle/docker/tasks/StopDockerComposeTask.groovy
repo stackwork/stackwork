@@ -14,7 +14,8 @@ class StopDockerComposeTask extends Exec {
       extension.stopContainers
     }
 
-    commandLine 'docker-compose', '-f', project.docker.composeFile, '-p', project.docker.composeProject, 'stop'
+    commandLine 'docker-compose', '-f', "${->project.docker.composeFile}", '-p', "${->project.docker.composeProject}",
+            'stop'
   }
 
 }

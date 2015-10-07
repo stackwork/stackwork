@@ -17,3 +17,7 @@ tasks.tagImage.doLast {
     throw new IllegalStateException('docker.fullImageName has not been set, which is what we are testing for -> fail')
   }
 }
+
+afterEvaluate {
+  tasks.check.dependsOn tasks.tagImage
+}

@@ -16,7 +16,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "The build image task builds the DockerFile in the project root"() {
     when:
-    GradleOutput output = runGradleTask('clean check', 'build')
+    GradleOutput output = runGradleTask('build')
 
     then:
     output.process.exitValue() == 0
@@ -24,7 +24,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "A test module that applies the JavaPlugin is allowed to connect to an image in unit tests trough appropriately set system properties"() {
     when:
-    GradleOutput output = runGradleTask('clean check', 'unit-test')
+    GradleOutput output = runGradleTask('unit-test')
 
     then:
     output.process.exitValue() == 0
@@ -32,7 +32,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "The tag image task tags a built image with 'docker.imageName:project.version' number, which is exposed as 'docker.fullImageName'"() {
     when:
-    GradleOutput output = runGradleTask('tagImage', 'tag')
+    GradleOutput output = runGradleTask('tag')
 
     then:
     output.process.exitValue() == 0
@@ -40,7 +40,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "Tagging an image does not work if the project.version is not set"() {
     when:
-    GradleOutput output = runGradleTask('tagImage', 'tag-no-version', NO_STACKTRACE)
+    GradleOutput output = runGradleTask('tag-no-version', NO_STACKTRACE)
 
     then:
     output.process.exitValue() != 0
@@ -49,7 +49,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "Tagging an image does not work if the docker.imageName is not set"() {
     when:
-    GradleOutput output = runGradleTask('tagImage', 'tag-no-image-name', NO_STACKTRACE)
+    GradleOutput output = runGradleTask('tag-no-image-name', NO_STACKTRACE)
 
     then:
     output.process.exitValue() != 0
@@ -58,7 +58,7 @@ class DockerPluginSpecifications extends Specification {
 
   def "The push image task tries to push an image."() {
     when:
-    GradleOutput output = runGradleTask('pushImage', 'push-public-hub-no-namespace', NO_STACKTRACE)
+    GradleOutput output = runGradleTask('push-public-hub-no-namespace', NO_STACKTRACE)
 
     then:
     output.process.exitValue() != 0
@@ -67,7 +67,7 @@ class DockerPluginSpecifications extends Specification {
 
   def 'The runTestImage task runs the test image built in a test-image module against the docker compose setup'() {
     when:
-    GradleOutput output = runGradleTask('clean check', 'test-image')
+    GradleOutput output = runGradleTask('test-image')
 
     then:
     output.process.exitValue() == 0
@@ -76,15 +76,15 @@ class DockerPluginSpecifications extends Specification {
 
   def 'A test image designed to fail should fail the test, and thus the build'() {
     when:
-    GradleOutput output = runGradleTask('clean check', 'test-image-failing-test', NO_STACKTRACE)
+    GradleOutput output = runGradleTask('test-image-failing-test', NO_STACKTRACE)
 
     then:
     output.process.exitValue() == 1
     output.standardErr.contains 'not.the.correct.domain'
   }
 
-  private static GradleOutput runGradleTask(String task, String project, boolean printStacktrace = true) {
-    def proc = "gradle $task -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
+  private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
+    def proc = "gradle clean check -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()
     OutputStream standardErr = new ByteArrayOutputStream()
     proc.waitForProcessOutput(standardOut, standardErr)

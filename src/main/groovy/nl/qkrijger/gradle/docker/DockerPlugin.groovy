@@ -106,6 +106,9 @@ class DockerPlugin implements Plugin<Project> {
     project.tasks.getByName(STOP_DOCKER_COMPOSE_TASK_NAME)
             .mustRunAfter(RUN_TEST_IMAGE_TASK_NAME)
 
+    project.tasks.getByName(RUN_DOCKER_COMPOSE_TASK_NAME)
+            .finalizedBy(CLEAN_DOCKER_COMPOSE_TASK_NAME)
+
   }
 
   private void createTaskOrdering() {

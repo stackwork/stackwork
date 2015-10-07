@@ -20,6 +20,9 @@ allprojects { Project currentProject ->
     }
     cleanupTask.onlyIf {
       currentProject.extensions.docker.stopContainers && currentProject.tasks.findByName('buildImage')?.didWork }
+    if (currentProject.tasks.findByName('buildImage')) {
+      currentProject.tasks.getByName('buildImage').finalizedBy cleanupTask
+    }
 
     Task testTask = currentProject.tasks.findByName('test')
     if (testTask) {

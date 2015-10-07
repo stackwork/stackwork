@@ -14,7 +14,8 @@ class CleanDockerComposeTask extends Exec {
       extension.stopContainers
     }
 
-    commandLine 'docker-compose', '-f', project.docker.composeFile, '-p', project.docker.composeProject, 'rm', '-f'
+    commandLine 'docker-compose', '-f', "${->project.docker.composeFile}", '-p', "${->project.docker.composeProject}",
+                'rm', '-f'
   }
 
 }

@@ -1,0 +1,4 @@
+service:
+  image: ${rootProject.docker.imageId}
+  ports:
+  - 80

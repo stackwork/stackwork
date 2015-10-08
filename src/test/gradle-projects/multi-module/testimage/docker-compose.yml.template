@@ -1,0 +1,6 @@
+service:
+  image: ${rootProject.docker.imageId}
+${name}:
+  image: ${docker.imageId}
+  links:
+  - service:server

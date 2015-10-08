@@ -19,10 +19,9 @@ allprojects { Project currentProject ->
       commandLine 'docker', 'rmi', "-f" , "${-> currentProject.docker.imageId}"
     }
     cleanupTask.onlyIf {
-      currentProject.extensions.docker.stopContainers && currentProject.tasks.findByName('buildImage')?.didWork }
-    if (currentProject.tasks.findByName('buildImage')) {
-      currentProject.tasks.getByName('buildImage').finalizedBy cleanupTask
+      currentProject.extensions.docker.stopContainers && currentProject.tasks.findByName('buildImage')?.didWork
     }
+    currentProject.tasks.findByName('buildImage')?.finalizedBy cleanupTask
 
     Task testTask = currentProject.tasks.findByName('test')
     if (testTask) {

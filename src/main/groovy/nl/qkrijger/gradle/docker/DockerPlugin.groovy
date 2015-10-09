@@ -11,6 +11,7 @@ import static nl.qkrijger.gradle.docker.DockerModuleType.TEST_IMAGE
 
 class DockerPlugin implements Plugin<Project> {
 
+  public static final String COLLECT_IMAGE_DEPENDENCIES_TASK_NAME = 'collectImageDependencies'
   public static final String BUILD_IMAGE_TASK_NAME = 'buildImage'
   public static final String GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME = 'generateDockerComposeFile'
   public static final String RUN_DOCKER_COMPOSE_TASK_NAME = 'runDockerCompose'
@@ -19,9 +20,6 @@ class DockerPlugin implements Plugin<Project> {
   public static final String TAG_IMAGE_TASK_NAME = 'tagImage'
   public static final String PUSH_IMAGE_TASK_NAME = 'pushImage'
   public static final String RUN_TEST_IMAGE_TASK_NAME = 'runTestImage'
-
-  private Project project
-  private boolean isRootProject
 
   @Override
   void apply(Project project) {
@@ -36,6 +34,13 @@ class DockerPlugin implements Plugin<Project> {
     evaluateEnvironment()
 
     project.extensions.create('docker', DockerExtension, project)
+
+    project.configurations {
+      docker {
+        description = 'Docker artifacts to be made available for an image build'
+      }
+    }
+
     registerTasks()
 
     project.plugins.withType(JavaPlugin) {
@@ -55,6 +60,9 @@ class DockerPlugin implements Plugin<Project> {
       integrateWithCheckTask()
     }
   }
+  private Project project
+
+  private boolean isRootProject
 
   private void evaluateEnvironment() {
     String dockerHost = System.getenv('DOCKER_HOST')
@@ -71,7 +79,11 @@ class DockerPlugin implements Plugin<Project> {
   }
 
   private void registerTasks() {
+    project.task(COLLECT_IMAGE_DEPENDENCIES_TASK_NAME, type: CollectImageDependenciesTask)
+            .onlyIf { isRootProject || isModuleType(TEST_IMAGE) }
+
     project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask)
+            .dependsOn(COLLECT_IMAGE_DEPENDENCIES_TASK_NAME)
             .onlyIf { isRootProject || isModuleType(TEST_IMAGE) }
 
     project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask)

@@ -83,6 +83,14 @@ class DockerPluginSpecifications extends Specification {
     output.standardErr.contains 'not.the.correct.domain'
   }
 
+  def 'Dependencies in the "docker" configuration are supplied to the image build through the build directory'() {
+    when:
+    GradleOutput output = runGradleTask('dependencies')
+
+    then:
+    output.process.exitValue() == 0
+  }
+
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
     def proc = "gradle clean check -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()

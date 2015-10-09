@@ -1,5 +1,4 @@
 package nl.qkrijger.gradle.docker
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -12,12 +11,6 @@ class DockerJavaPlugin implements Plugin<Project> {
     def runDockerComposeTask = project.tasks.getByName(DockerPlugin.RUN_DOCKER_COMPOSE_TASK_NAME)
     def stopDockerComposeTask = project.tasks.getByName(DockerPlugin.STOP_DOCKER_COMPOSE_TASK_NAME)
     def testTask = project.tasks.test
-
-    project.afterEvaluate {
-      if (project.dockerModuleType == 'test' && !project.parent) {
-        throw new IllegalArgumentException('The root project is not allowed to be a docker module')
-      }
-    }
 
     testTask.doFirst {
       project.logger.info 'Loading docker service information into the JVM as system properties'

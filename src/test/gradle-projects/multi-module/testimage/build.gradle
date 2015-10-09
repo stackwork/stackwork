@@ -1,6 +1,5 @@
-ext.dockerModuleType = 'test-image'   // test-image ()
-                                      // image (artifact, such as a stub)
-                                      // test (doing tests, unit-test)
-                                      // docker-compose (run docker compose once for multiple modules)
-                                         // ext.composeModule = ':compose-mod'
-                                         // ext.composeModule = ':' - allows to test the main projects compose file
+import static nl.qkrijger.gradle.docker.DockerModuleType.*
+
+docker {
+  dockerModuleType = TEST_IMAGE
+}

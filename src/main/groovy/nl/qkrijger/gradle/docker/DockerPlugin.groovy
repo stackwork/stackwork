@@ -21,11 +21,12 @@ class DockerPlugin implements Plugin<Project> {
   public static final String PUSH_IMAGE_TASK_NAME = 'pushImage'
   public static final String RUN_TEST_IMAGE_TASK_NAME = 'runTestImage'
 
+  private Project project
+
   @Override
   void apply(Project project) {
 
     this.project = project
-    this.isRootProject = project.rootProject == project
 
     project.ext.docker = [:]
     project.docker.services = [:]
@@ -33,7 +34,7 @@ class DockerPlugin implements Plugin<Project> {
 
     evaluateEnvironment()
 
-    project.extensions.create('docker', DockerExtension, project)
+    project.extensions.create('docker', DockerExtension)
 
     project.configurations {
       docker {
@@ -48,8 +49,8 @@ class DockerPlugin implements Plugin<Project> {
     }
 
     project.afterEvaluate {
-      if (project.parent && project.hasProperty('dockerModuleType')) {
-        project.parent.docker.modules["${project.name}"] = project.dockerModuleType
+      if (project.parent) {
+        project.parent.docker.modules["${project.name}"] = getDockerModuleType()
       }
       createTaskOrdering()
       if (!project.plugins.hasPlugin(JavaPlugin)) {
@@ -60,9 +61,14 @@ class DockerPlugin implements Plugin<Project> {
       integrateWithCheckTask()
     }
   }
-  private Project project
 
-  private boolean isRootProject
+  private boolean isRootProject() {
+    project.rootProject == project
+  }
+
+  private DockerModuleType getDockerModuleType() {
+    project.extensions.getByType(DockerExtension).dockerModuleType
+  }
 
   private void evaluateEnvironment() {
     String dockerHost = System.getenv('DOCKER_HOST')
@@ -80,19 +86,19 @@ class DockerPlugin implements Plugin<Project> {
 
   private void registerTasks() {
     project.task(COLLECT_IMAGE_DEPENDENCIES_TASK_NAME, type: CollectImageDependenciesTask)
-            .onlyIf { isRootProject || isModuleType(TEST_IMAGE) }
+            .onlyIf { isRootProject() || isModuleType(TEST_IMAGE) }
 
     project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask)
             .dependsOn(COLLECT_IMAGE_DEPENDENCIES_TASK_NAME)
-            .onlyIf { isRootProject || isModuleType(TEST_IMAGE) }
+            .onlyIf { isRootProject() || isModuleType(TEST_IMAGE) }
 
     project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask)
             .dependsOn(BUILD_IMAGE_TASK_NAME)
-            .onlyIf { isRootProject }
+            .onlyIf { isRootProject() }
 
     project.task(PUSH_IMAGE_TASK_NAME, type: PushImageTask)
             .dependsOn(TAG_IMAGE_TASK_NAME)
-            .onlyIf { isRootProject }
+            .onlyIf { isRootProject() }
 
     project.task(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME, type: GenerateDockerComposeFileTask)
             .dependsOn(BUILD_IMAGE_TASK_NAME)
@@ -125,6 +131,7 @@ class DockerPlugin implements Plugin<Project> {
 
   private void createTaskOrdering() {
     Project parentOrSelf = project.parent ?: project
+    // make docker-compose run after all sibling and child projects have built their images
     project.tasks.getByName(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME)
             .dependsOn parentOrSelf.getTasksByName(BUILD_IMAGE_TASK_NAME, true)
   }
@@ -134,7 +141,7 @@ class DockerPlugin implements Plugin<Project> {
   }
 
   private boolean isModuleType(DockerModuleType moduleType) {
-    project.hasProperty('dockerModuleType') && project.dockerModuleType == moduleType.value
+    project.extensions.getByType(DockerExtension).dockerModuleType == moduleType
   }
 
 }

@@ -1,17 +1,16 @@
 package nl.qkrijger.gradle.docker
 
-import org.gradle.api.Project
+import static nl.qkrijger.gradle.docker.DockerModuleType.DEFAULT
 
 class DockerExtension {
-
-  Project project
 
   /**
    * Indicates whether containers should be stopped after the tests are executed.
    */
   Boolean stopContainers = true
+  /**
+   * Indoicates the type of {@link DockerModuleType} of a Gradle sub project
+   */
+  DockerModuleType dockerModuleType = DEFAULT
 
-  DockerExtension(Project project) {
-    this.project = project
-  }
 }

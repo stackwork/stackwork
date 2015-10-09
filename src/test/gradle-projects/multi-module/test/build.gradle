@@ -1,6 +1,10 @@
+import static nl.qkrijger.gradle.docker.DockerModuleType.*
+
 apply plugin: 'groovy'
 
-ext.dockerModuleType = 'test'
+docker {
+  dockerModuleType = TEST
+}
 
 dependencies {
   compile gradleApi()

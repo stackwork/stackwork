@@ -9,8 +9,10 @@ allprojects {
 def travisBuild = System.getenv('TRAVIS_BRANCH') != null
 logger.info "Running on Travis: '$travisBuild'"
 
-docker {
-  stopContainers = !travisBuild
+allprojects {
+  docker {
+    stopContainers = !travisBuild
+  }
 }
 
 allprojects { Project currentProject ->

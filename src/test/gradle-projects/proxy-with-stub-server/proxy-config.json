@@ -1,0 +1,9 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": ".*"
+  },
+  "response": {
+    "proxyBaseUrl" : "http://otherhost"
+  }
+}

@@ -1,0 +1,5 @@
+import static nl.qkrijger.gradle.docker.DockerModuleType.*
+
+docker {
+  dockerModuleType = TEST_IMAGE
+}

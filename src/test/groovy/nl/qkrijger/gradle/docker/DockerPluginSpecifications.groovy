@@ -91,6 +91,14 @@ class DockerPluginSpecifications extends Specification {
     output.process.exitValue() == 0
   }
 
+  def 'Any image can be build in an "image module" and be included in a docker-compose setup'() {
+    when:
+    GradleOutput output = runGradleTask('proxy-with-stub-server')
+
+    then:
+    output.process.exitValue() == 0
+  }
+
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
     def proc = "gradle clean check -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()

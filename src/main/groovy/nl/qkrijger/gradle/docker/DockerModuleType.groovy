@@ -21,5 +21,11 @@ enum DockerModuleType {
    * Builds a test image, and run that agains the Docker Compose setup.
    */
   TEST_IMAGE,
+  /**
+   * Image module.
+   *
+   * Any image needed in other modules docker compose setups can be created in an image module.
+   */
+  IMAGE,
 
 }

@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPlugin
 
+import static nl.qkrijger.gradle.docker.DockerModuleType.IMAGE
 import static nl.qkrijger.gradle.docker.DockerModuleType.TEST
 import static nl.qkrijger.gradle.docker.DockerModuleType.TEST_IMAGE
 
@@ -86,11 +87,11 @@ class DockerPlugin implements Plugin<Project> {
 
   private void registerTasks() {
     project.task(COLLECT_IMAGE_DEPENDENCIES_TASK_NAME, type: CollectImageDependenciesTask)
-            .onlyIf { isRootProject() || isModuleType(TEST_IMAGE) }
+            .onlyIf { isRootProject() || isModuleType(TEST_IMAGE) || isModuleType(IMAGE) }
 
     project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask)
             .dependsOn(COLLECT_IMAGE_DEPENDENCIES_TASK_NAME)
-            .onlyIf { isRootProject() || isModuleType(TEST_IMAGE) }
+            .onlyIf { isRootProject() || isModuleType(TEST_IMAGE) || isModuleType(IMAGE) }
 
     project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask)
             .dependsOn(BUILD_IMAGE_TASK_NAME)

@@ -29,9 +29,13 @@ allprojects { Project currentProject ->
     if (testTask) {
       cleanupTask.mustRunAfter testTask
     }
-    currentProject.getAllTasks(true).values().each { taskSet ->
-      taskSet.findAll({ task -> task.group == 'Docker' || task.name == 'test' }).each { dockerTask ->
-        cleanupTask.mustRunAfter dockerTask
+
+    Project parentOrSelf = currentProject.parent ?: currentProject
+    parentOrSelf.allprojects { otherProject ->
+      otherProject.getAllTasks(true).values().each { taskSet ->
+        taskSet.findAll({ task -> task.group == 'Docker' || task.name == 'test' }).each { dockerTask ->
+          cleanupTask.mustRunAfter dockerTask
+        }
       }
     }
     if (currentProject.tasks.findByName('check')) {

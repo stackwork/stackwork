@@ -99,6 +99,15 @@ class DockerPluginSpecifications extends Specification {
     output.process.exitValue() == 0
   }
 
+  def 'Multiple test suites with unit tests and/or test images can be set up'() {
+    when:
+    GradleOutput output = runGradleTask('multi-module')
+
+    then:
+    output.process.exitValue() == 0
+    output.standardOut.contains 'Serving frontend'
+  }
+
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
     def proc = "gradle clean check -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()

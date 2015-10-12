@@ -1,7 +1,10 @@
 package nl.qkrijger.gradle.docker.tasks
 
+import nl.qkrijger.gradle.docker.DockerModuleType
 import org.gradle.api.internal.AbstractTask
 import org.yaml.snakeyaml.Yaml
+
+import static nl.qkrijger.gradle.docker.DockerModuleType.TEST_IMAGE
 
 class RunDockerComposeTask extends AbstractTask {
 
@@ -89,8 +92,8 @@ class RunDockerComposeTask extends AbstractTask {
     boolean serviceImageIsBuiltInModule = project.parent.docker.modules["$serviceName"]
     if (!serviceImageIsBuiltInModule) return false
 
-    def moduleType = project.parent.docker.modules["$serviceName"]
-    moduleType.equals('test-image')
+    DockerModuleType moduleType = project.parent.docker.modules["$serviceName"]
+    moduleType == TEST_IMAGE
   }
 
   String askComposeServicesContainerId(String serviceName) {

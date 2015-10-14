@@ -108,8 +108,8 @@ class DockerPluginSpecifications extends Specification {
     output.standardOut.contains 'Serving frontend'
   }
 
-  private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
-    def proc = "gradle clean check cleanup -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
+  private GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
+    def proc = "./gradlew clean check cleanup -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()
     OutputStream standardErr = new ByteArrayOutputStream()
     proc.waitForProcessOutput(standardOut, standardErr)

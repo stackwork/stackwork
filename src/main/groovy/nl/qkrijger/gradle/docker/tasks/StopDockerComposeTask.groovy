@@ -5,6 +5,8 @@ import org.gradle.api.tasks.Exec
 
 class StopDockerComposeTask extends Exec {
 
+  final static NAME = 'stopDockerCompose'
+
   StopDockerComposeTask() {
     description = 'Stops the docker compose services'
     group = 'Docker'

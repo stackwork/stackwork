@@ -1,28 +1,29 @@
 package nl.qkrijger.gradle.docker
-
 import nl.qkrijger.gradle.docker.tasks.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPlugin
 
-import static nl.qkrijger.gradle.docker.DockerModuleType.IMAGE
-import static nl.qkrijger.gradle.docker.DockerModuleType.TEST
-import static nl.qkrijger.gradle.docker.DockerModuleType.TEST_IMAGE
+import static nl.qkrijger.gradle.docker.DockerModuleType.*
 
 class DockerPlugin implements Plugin<Project> {
 
-  public static final String COLLECT_IMAGE_DEPENDENCIES_TASK_NAME = 'collectImageDependencies'
-  public static final String BUILD_IMAGE_TASK_NAME = 'buildImage'
-  public static final String GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME = 'generateDockerComposeFile'
-  public static final String RUN_DOCKER_COMPOSE_TASK_NAME = 'runDockerCompose'
-  public static final String STOP_DOCKER_COMPOSE_TASK_NAME = 'stopDockerCompose'
-  public static final String CLEAN_DOCKER_COMPOSE_TASK_NAME = 'cleanDockerCompose'
-  public static final String TAG_IMAGE_TASK_NAME = 'tagImage'
-  public static final String PUSH_IMAGE_TASK_NAME = 'pushImage'
-  public static final String RUN_TEST_IMAGE_TASK_NAME = 'runTestImage'
-
   private Project project
+
+  private Task dockerTest
+  private Task dockerTestStart
+  private Task dockerCheck
+
+  private Task collectDependencies
+  private Task buildImage
+  private Task cleanCompose
+  private Task runCompose
+  private Task stopCompose
+  private Task pushImage
+  private Task tagImage
+  private Task runTestImage
+  private Task generateComposeFile
 
   @Override
   void apply(Project project) {
@@ -43,7 +44,12 @@ class DockerPlugin implements Plugin<Project> {
       }
     }
 
-    registerTasks()
+    registerInternalTasks()
+    orderInternalTasks()
+    filterInternalTasksToRun()
+
+    registerHookTasks()
+    setupHooksIntoInternalTasks()
 
     project.plugins.withType(JavaPlugin) {
       project.plugins.apply(DockerJavaPlugin)
@@ -53,22 +59,8 @@ class DockerPlugin implements Plugin<Project> {
       if (project.parent) {
         project.parent.docker.modules["${project.name}"] = getDockerModuleType()
       }
-      createTaskOrdering()
-      if (!project.plugins.hasPlugin(JavaPlugin)) {
-        project.task('check') {
-          description: 'Check task added by Docker Plugin (apparently, the JavaPlugin was not loaded in this project)'
-        }
-      }
-      integrateWithCheckTask()
+      coupleComposeTasksToRelatedModulesBuildTasks()
     }
-  }
-
-  private boolean isRootProject() {
-    project.rootProject == project
-  }
-
-  private DockerModuleType getDockerModuleType() {
-    project.extensions.getByType(DockerExtension).dockerModuleType
   }
 
   private void evaluateEnvironment() {
@@ -85,64 +77,91 @@ class DockerPlugin implements Plugin<Project> {
     }
   }
 
-  private void registerTasks() {
-    project.task(COLLECT_IMAGE_DEPENDENCIES_TASK_NAME, type: CollectImageDependenciesTask)
-            .onlyIf { isRootProject() || isModuleType(TEST_IMAGE) || isModuleType(IMAGE) }
-
-    project.task(BUILD_IMAGE_TASK_NAME, type: BuildImageTask)
-            .dependsOn(COLLECT_IMAGE_DEPENDENCIES_TASK_NAME)
-            .onlyIf { isRootProject() || isModuleType(TEST_IMAGE) || isModuleType(IMAGE) }
-
-    project.task(TAG_IMAGE_TASK_NAME, type: TagImageTask)
-            .dependsOn(BUILD_IMAGE_TASK_NAME)
-            .onlyIf { isRootProject() }
-
-    project.task(PUSH_IMAGE_TASK_NAME, type: PushImageTask)
-            .dependsOn(TAG_IMAGE_TASK_NAME)
-            .onlyIf { isRootProject() }
-
-    project.task(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME, type: GenerateDockerComposeFileTask)
-            .dependsOn(BUILD_IMAGE_TASK_NAME)
-            .onlyIf { isModuleType(TEST_IMAGE) || isModuleType(TEST) }
-
-    project.task(RUN_DOCKER_COMPOSE_TASK_NAME, type: RunDockerComposeTask)
-            .dependsOn(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME)
-            .onlyIf { isModuleType(TEST_IMAGE) || isModuleType(TEST) }
-
-    project.task(STOP_DOCKER_COMPOSE_TASK_NAME, type: StopDockerComposeTask)
-            .dependsOn(RUN_DOCKER_COMPOSE_TASK_NAME)
-            .onlyIf { isModuleType(TEST_IMAGE) || isModuleType(TEST) }
-
-    project.task(CLEAN_DOCKER_COMPOSE_TASK_NAME, type: CleanDockerComposeTask)
-            .dependsOn(STOP_DOCKER_COMPOSE_TASK_NAME)
-            .onlyIf { isModuleType(TEST_IMAGE) || isModuleType(TEST) }
-
-    project.task(RUN_TEST_IMAGE_TASK_NAME, type: RunTestImageTask)
-            .dependsOn(BUILD_IMAGE_TASK_NAME)
-            .dependsOn(RUN_DOCKER_COMPOSE_TASK_NAME)
-            .onlyIf { isModuleType(TEST_IMAGE) }
-
-    project.tasks.getByName(STOP_DOCKER_COMPOSE_TASK_NAME)
-            .mustRunAfter(RUN_TEST_IMAGE_TASK_NAME)
-
-    project.tasks.getByName(RUN_DOCKER_COMPOSE_TASK_NAME)
-            .finalizedBy(CLEAN_DOCKER_COMPOSE_TASK_NAME)
-
+  private void registerHookTasks() {
+    dockerTest = project.task(HookTaskNames.DOCKER_TEST_TASK_NAME)
+    dockerTestStart = project.task(HookTaskNames.DOCKER_TEST_START_TASK_NAME)
+    dockerCheck = project.task(HookTaskNames.DOCKER_CHECK_TASK_NAME)
   }
 
-  private void createTaskOrdering() {
+  private void registerInternalTasks() {
+    Closure<Task> createTask = { Class<? extends Task> namedClazz ->
+      project.task(namedClazz.NAME, type: namedClazz)
+    }
+
+    collectDependencies = createTask(CollectImageDependenciesTask)
+    buildImage = createTask(BuildImageTask)
+    tagImage = createTask(TagImageTask)
+    pushImage = createTask(PushImageTask)
+    generateComposeFile = createTask(GenerateDockerComposeFileTask)
+    runCompose = createTask(RunDockerComposeTask)
+    stopCompose = createTask(StopDockerComposeTask)
+    cleanCompose = createTask(CleanDockerComposeTask)
+    runTestImage = createTask(RunTestImageTask)
+  }
+
+  private void setupHooksIntoInternalTasks() {
+    dockerCheck.dependsOn dockerTest, cleanCompose
+
+    dockerTestStart.dependsOn runCompose
+    dockerTest.dependsOn dockerTestStart
+    stopCompose.mustRunAfter dockerTest
+    runCompose.finalizedBy cleanCompose
+
+    tagImage.dependsOn dockerCheck
+
+    runTestImage.dependsOn dockerTestStart
+    dockerTest.dependsOn runTestImage
+  }
+
+  private void orderInternalTasks() {
+    buildImage.dependsOn collectDependencies
+    tagImage.dependsOn buildImage
+    pushImage.dependsOn tagImage
+    generateComposeFile.dependsOn buildImage
+    runCompose.dependsOn generateComposeFile
+    stopCompose.dependsOn runCompose
+    cleanCompose.dependsOn stopCompose
+  }
+
+  private void filterInternalTasksToRun() {
+    Closure<Boolean> isRootProject = {
+      project.rootProject == project
+    }
+
+    Closure<Boolean> isDockerComposeProject = {
+      isModuleType(TEST_IMAGE) || isModuleType(TEST)
+    }
+
+    Closure<Boolean> isImageBuildingProject = {
+      isRootProject() || isModuleType(TEST_IMAGE) || isModuleType(IMAGE)
+    }
+
+    collectDependencies.onlyIf isImageBuildingProject
+    buildImage.onlyIf isImageBuildingProject
+    tagImage.onlyIf isRootProject
+    pushImage.onlyIf isRootProject
+    generateComposeFile.onlyIf isDockerComposeProject
+    runCompose.onlyIf isDockerComposeProject
+    stopCompose.onlyIf isDockerComposeProject
+    cleanCompose.onlyIf isDockerComposeProject
+    runTestImage.onlyIf { isModuleType(TEST_IMAGE) }
+  }
+
+  private void coupleComposeTasksToRelatedModulesBuildTasks() {
     Project parentOrSelf = project.parent ?: project
     // make docker-compose run after all sibling and child projects have built their images
-    project.tasks.getByName(GENERATE_DOCKER_COMPOSE_FILE_TASK_NAME)
-            .dependsOn parentOrSelf.getTasksByName(BUILD_IMAGE_TASK_NAME, true)
-  }
-
-  private Task integrateWithCheckTask() {
-    project.tasks.check.dependsOn RUN_TEST_IMAGE_TASK_NAME, CLEAN_DOCKER_COMPOSE_TASK_NAME
+    def relevantBuildImageTasks = parentOrSelf.getTasksByName(BuildImageTask.name, true)
+    if (!relevantBuildImageTasks.empty) {
+      generateComposeFile.dependsOn relevantBuildImageTasks
+    }
   }
 
   private boolean isModuleType(DockerModuleType moduleType) {
-    project.extensions.getByType(DockerExtension).dockerModuleType == moduleType
+    getDockerModuleType() == moduleType
+  }
+
+  private DockerModuleType getDockerModuleType() {
+    project.extensions.getByType(DockerExtension).dockerModuleType
   }
 
 }

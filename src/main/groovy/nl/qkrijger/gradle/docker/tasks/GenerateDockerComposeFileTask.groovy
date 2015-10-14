@@ -4,6 +4,8 @@ import org.gradle.api.tasks.Copy
 
 class GenerateDockerComposeFileTask extends Copy {
 
+  final static NAME = 'generateDockerComposeFile'
+
   GenerateDockerComposeFileTask() {
 
     // disable task caching

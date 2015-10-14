@@ -18,5 +18,5 @@ task('inspectImage',
 
 tasks.inspectImage.dependsOn tasks.buildImage
 afterEvaluate {
-  tasks.check.dependsOn tasks.inspectImage
+  tasks.dockerCheck.dependsOn tasks.inspectImage
 }

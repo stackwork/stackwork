@@ -16,34 +16,29 @@ allprojects {
 }
 
 allprojects { Project currentProject ->
+
+  afterEvaluate {
+    if (!currentProject.tasks.hasProperty('check')) {
+      currentProject.task('check').dependsOn currentProject.tasks.dockerCheck
+    }
+  }
+
   afterEvaluate {
     Task cleanupTask = currentProject.task('cleanup', description: 'Remove the test docker image by id,', type: Exec) {
       commandLine 'docker', 'rmi', "-f" , "${-> currentProject.docker.imageId}"
     }
     cleanupTask.onlyIf {
-      currentProject.extensions.docker.stopContainers && currentProject.tasks.findByName('buildImage')?.didWork
+      currentProject.extensions.docker.stopContainers && currentProject.tasks.buildImage.didWork
     }
-    currentProject.tasks.findByName('buildImage')?.finalizedBy cleanupTask
+    currentProject.tasks.buildImage.finalizedBy cleanupTask
 
-    Task testTask = currentProject.tasks.findByName('test')
-    if (testTask) {
-      cleanupTask.mustRunAfter testTask
-    }
+    cleanupTask.mustRunAfter currentProject.tasks.dockerTest
 
     Project parentOrSelf = currentProject.parent ?: currentProject
     parentOrSelf.allprojects { otherProject ->
       otherProject.getAllTasks(true).values().each { taskSet ->
         taskSet.findAll({ task -> task.group == 'Docker' || task.name == 'test' }).each { dockerTask ->
           cleanupTask.mustRunAfter dockerTask
-        }
-      }
-    }
-    if (currentProject.tasks.findByName('check')) {
-      currentProject.tasks.findByName('check').dependsOn cleanupTask
-    } else {
-      currentProject.tasks.whenTaskAdded { Task addedTask ->
-        if (addedTask.name == 'check') {
-          addedTask.dependsOn cleanupTask
         }
       }
     }

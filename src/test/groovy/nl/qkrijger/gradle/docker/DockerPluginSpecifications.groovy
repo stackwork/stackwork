@@ -109,7 +109,7 @@ class DockerPluginSpecifications extends Specification {
   }
 
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
-    def proc = "gradle clean check -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
+    def proc = "gradle clean check cleanup -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()
     OutputStream standardErr = new ByteArrayOutputStream()
     proc.waitForProcessOutput(standardOut, standardErr)

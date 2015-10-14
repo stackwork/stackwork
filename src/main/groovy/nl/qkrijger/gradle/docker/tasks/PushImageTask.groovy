@@ -5,6 +5,8 @@ import org.gradle.api.tasks.Exec
 
 class PushImageTask extends Exec {
 
+  final static NAME = 'pushImage'
+
   PushImageTask() {
 
     description = 'Push the image tagged during "tagImage"'

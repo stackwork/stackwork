@@ -8,6 +8,8 @@ import static nl.qkrijger.gradle.docker.DockerModuleType.TEST_IMAGE
 
 class RunDockerComposeTask extends AbstractTask {
 
+  final static NAME = 'runDockerCompose'
+
   Map<String, Object> composeInfo
   List<String> longRunningServices
   String composeFile = project.docker.composeFile

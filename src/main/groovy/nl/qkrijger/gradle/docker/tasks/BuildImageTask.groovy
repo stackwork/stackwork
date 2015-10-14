@@ -4,6 +4,8 @@ import org.gradle.api.tasks.Exec
 
 class BuildImageTask extends Exec {
 
+  final static NAME = 'buildImage'
+
   BuildImageTask() {
 
     description = 'Builds the Dockerfile in your project root folder.'

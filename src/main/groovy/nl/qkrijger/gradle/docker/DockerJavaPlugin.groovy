@@ -8,11 +8,7 @@ class DockerJavaPlugin implements Plugin<Project> {
   void apply(Project project) {
     project.logger.debug 'Applying DockerJavaPlugin'
 
-    def runDockerComposeTask = project.tasks.getByName(DockerPlugin.RUN_DOCKER_COMPOSE_TASK_NAME)
-    def stopDockerComposeTask = project.tasks.getByName(DockerPlugin.STOP_DOCKER_COMPOSE_TASK_NAME)
-    def testTask = project.tasks.test
-
-    testTask.doFirst {
+    project.tasks.test.doFirst {
       project.logger.info 'Loading docker service information into the JVM as system properties'
       project.docker.services.each { serviceName, serviceInfo ->
         serviceInfo.each { infoKey, infoVal ->
@@ -23,8 +19,9 @@ class DockerJavaPlugin implements Plugin<Project> {
       }
     }
 
-    testTask.dependsOn runDockerComposeTask
-    stopDockerComposeTask.mustRunAfter testTask
+    project.tasks.check.dependsOn project.tasks.dockerCheck
+    project.tasks.dockerTest.dependsOn project.tasks.test
+    project.tasks.test.mustRunAfter project.tasks.dockerTestStart
   }
 
 }

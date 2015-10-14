@@ -5,6 +5,8 @@ import org.gradle.api.tasks.Exec
 
 class TagImageTask extends Exec {
 
+  final static NAME = 'tagImage'
+
   TagImageTask() {
 
     description = 'Tag the built during "buildImage" with the docker.imageName and project.version.'

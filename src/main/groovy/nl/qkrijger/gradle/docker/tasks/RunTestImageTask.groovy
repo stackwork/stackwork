@@ -5,6 +5,8 @@ import org.gradle.api.internal.AbstractTask
 
 class RunTestImageTask extends AbstractTask {
 
+  final static NAME = 'runTestImage'
+
   RunTestImageTask() {
     description = 'Runs, logs and removes the test image that is built in the project (module) ' +
             'via the docker compose configuration'

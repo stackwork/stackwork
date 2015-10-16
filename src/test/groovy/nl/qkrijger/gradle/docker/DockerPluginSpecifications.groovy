@@ -108,6 +108,15 @@ class DockerPluginSpecifications extends Specification {
     output.standardOut.contains 'Serving frontend'
   }
 
+  def 'Multiple test suites can use the same docker compose setup'() {
+    when:
+    GradleOutput output = runGradleTask('compose-dependency')
+
+    then:
+    output.process.exitValue() == 0
+    output.standardOut.contains 'Serving frontend'
+  }
+  
   private GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
     def proc = "./gradlew clean check cleanup -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()

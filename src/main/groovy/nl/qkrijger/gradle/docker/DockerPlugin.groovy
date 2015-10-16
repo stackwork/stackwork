@@ -36,7 +36,7 @@ class DockerPlugin implements Plugin<Project> {
 
     evaluateEnvironment()
 
-    project.extensions.create('docker', DockerExtension)
+    project.extensions.create('docker', DockerExtension, project)
 
     project.configurations {
       docker {
@@ -60,6 +60,7 @@ class DockerPlugin implements Plugin<Project> {
         project.parent.docker.modules["${project.name}"] = getDockerModuleType()
       }
       coupleComposeTasksToRelatedModulesBuildTasks()
+      coupleTestTasksToComposeModule()
     }
   }
 
@@ -128,31 +129,42 @@ class DockerPlugin implements Plugin<Project> {
       project.rootProject == project
     }
 
-    Closure<Boolean> isDockerComposeProject = {
-      isModuleType(TEST_IMAGE) || isModuleType(TEST)
+    Closure<Boolean> shouldRunDockerCompose = {
+      def dependsOnComposeProject = project != getComposeProject()
+      isModuleType(COMPOSE) ||
+      (isModuleType(TEST_IMAGE) && !dependsOnComposeProject) ||
+      (isModuleType(TEST) && !dependsOnComposeProject)
     }
 
-    Closure<Boolean> isImageBuildingProject = {
+    Closure<Boolean> shouldBuildImage = {
       isRootProject() || isModuleType(TEST_IMAGE) || isModuleType(IMAGE)
     }
 
-    collectDependencies.onlyIf isImageBuildingProject
-    buildImage.onlyIf isImageBuildingProject
+    collectDependencies.onlyIf shouldBuildImage
+    buildImage.onlyIf shouldBuildImage
     tagImage.onlyIf isRootProject
     pushImage.onlyIf isRootProject
-    generateComposeFile.onlyIf isDockerComposeProject
-    runCompose.onlyIf isDockerComposeProject
-    stopCompose.onlyIf isDockerComposeProject
-    cleanCompose.onlyIf isDockerComposeProject
+    generateComposeFile.onlyIf shouldRunDockerCompose
+    runCompose.onlyIf shouldRunDockerCompose
+    stopCompose.onlyIf shouldRunDockerCompose
+    cleanCompose.onlyIf shouldRunDockerCompose
     runTestImage.onlyIf { isModuleType(TEST_IMAGE) }
   }
 
   private void coupleComposeTasksToRelatedModulesBuildTasks() {
     Project parentOrSelf = project.parent ?: project
     // make docker-compose run after all sibling and child projects have built their images
-    def relevantBuildImageTasks = parentOrSelf.getTasksByName(BuildImageTask.name, true)
+    def relevantBuildImageTasks = parentOrSelf.getTasksByName(BuildImageTask.NAME, true)
     if (!relevantBuildImageTasks.empty) {
       generateComposeFile.dependsOn relevantBuildImageTasks
+    }
+  }
+
+  private void coupleTestTasksToComposeModule() {
+    def composeProject = getComposeProject()
+    if (composeProject != project) {
+      project.tasks.dockerTestStart.dependsOn composeProject.tasks.dockerTestStart
+      composeProject.tasks.dockerTest.dependsOn project.tasks.dockerTest
     }
   }
 
@@ -162,6 +174,10 @@ class DockerPlugin implements Plugin<Project> {
 
   private DockerModuleType getDockerModuleType() {
     project.extensions.getByType(DockerExtension).dockerModuleType
+  }
+
+  private Project getComposeProject() {
+    project.extensions.getByType(DockerExtension).composeProject
   }
 
 }

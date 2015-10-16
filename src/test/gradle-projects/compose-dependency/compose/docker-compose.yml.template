@@ -1,0 +1,11 @@
+# long-running services
+service:
+  image: ${project.rootProject.docker.imageId}
+  ports:
+  - 80
+
+# executable images, will not start during the runDockerCompose task
+testimage:
+  image: ${project.project(':testimage').docker.imageId}
+  links:
+  - service:server

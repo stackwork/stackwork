@@ -1,6 +1,7 @@
 package nl.qkrijger.gradle.docker.tasks
 
 import nl.qkrijger.gradle.docker.DockerExtension
+import org.gradle.api.Project
 import org.gradle.api.internal.AbstractTask
 
 class RunTestImageTask extends AbstractTask {
@@ -13,10 +14,12 @@ class RunTestImageTask extends AbstractTask {
     group = 'Docker'
 
     doLast {
+      Project composeProject = project.extensions.getByType(DockerExtension).composeProject
+
       OutputStream containerNameOutput = new ByteArrayOutputStream()
       project.exec {
-        setCommandLine(['docker-compose', '-f', project.docker.composeFile, '-p', project.docker.composeProject,
-                        'run', '-d', project.name])
+        setCommandLine(['docker-compose', '-f', composeProject.docker.composeFile,
+                        '-p', composeProject.docker.composeProject, 'run', '-d', project.name])
         setStandardOutput containerNameOutput
       }
       String containerName = containerNameOutput.toString().trim()

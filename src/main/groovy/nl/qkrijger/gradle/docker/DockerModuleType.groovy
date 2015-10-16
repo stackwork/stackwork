@@ -27,5 +27,12 @@ enum DockerModuleType {
    * Any image needed in other modules docker compose setups can be created in an image module.
    */
   IMAGE,
+  /**
+   * Docker compose module.
+   *
+   * Either the root project that has a docker compose file as deliverable that you want to test in the build.
+   * Or a module which supplies the docker compose setup to multiple other modules.
+   */
+  COMPOSE,
 
 }

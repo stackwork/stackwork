@@ -1,5 +1,3 @@
-apply plugin: 'docker'
-
 allprojects {
   repositories {
     jcenter()
@@ -9,13 +7,11 @@ allprojects {
 def travisBuild = System.getenv('TRAVIS_BRANCH') != null
 logger.info "Running on Travis: '$travisBuild'"
 
-allprojects {
+allprojects { currentProject ->
+  apply plugin: 'docker'
   docker {
     stopContainers = !travisBuild
   }
-}
-
-allprojects { Project currentProject ->
 
   afterEvaluate {
     if (!currentProject.tasks.hasProperty('check')) {

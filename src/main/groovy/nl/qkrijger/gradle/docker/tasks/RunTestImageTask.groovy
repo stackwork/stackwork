@@ -36,7 +36,7 @@ class RunTestImageTask extends AbstractTask {
       }
       int exitCode = exitCodeOutput.toString().trim() as int
 
-      if (project.rootProject.extensions.getByType(DockerExtension).stopContainers) {
+      if (project.extensions.getByType(DockerExtension).stopContainers) {
         project.exec {
           setCommandLine(['docker', 'rm', project.docker.containerId])
         }

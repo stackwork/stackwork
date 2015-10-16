@@ -12,8 +12,7 @@ class CleanDockerComposeTask extends Exec {
     group = 'Docker'
 
     onlyIf {
-      DockerExtension extension = project.rootProject.extensions.getByType(DockerExtension)
-      extension.stopContainers
+      project.extensions.getByType(DockerExtension).stopContainers
     }
 
     commandLine 'docker-compose', '-f', "${->project.docker.composeFile}", '-p', "${->project.docker.composeProject}",

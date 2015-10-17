@@ -28,6 +28,14 @@ enum DockerModuleType {
    */
   IMAGE,
   /**
+   * Image module for a deliverable image. For a deliverable image, tag and push tasks are created.
+   *
+   * Often, the root project has this type, building the image under test.
+   *
+   * Multiple modules can have this type, allowing to push multiple image in the same build job.
+   */
+  DELIVERABLE_IMAGE,
+  /**
    * Docker compose module.
    *
    * Either the root project that has a docker compose file as deliverable that you want to test in the build.

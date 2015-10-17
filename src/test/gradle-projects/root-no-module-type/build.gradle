@@ -1,5 +1,3 @@
-import static nl.qkrijger.gradle.docker.DockerModuleType.*
-
 buildscript {
   repositories {
     maven { url = "file://${project.projectDir}/../../../../build/repoForTests" }
@@ -11,12 +9,3 @@ buildscript {
 }
 apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
 
-docker.imageName = 'my-image'
-
-docker {
-  dockerModuleType = DELIVERABLE_IMAGE
-}
-
-afterEvaluate {
-  tasks.check.dependsOn tasks.tagImage
-}

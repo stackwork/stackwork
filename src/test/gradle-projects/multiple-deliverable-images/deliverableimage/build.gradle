@@ -1,0 +1,8 @@
+import static nl.qkrijger.gradle.docker.DockerModuleType.*
+
+version = '1.1-SNAPSHOT'
+docker.imageName = 'my-second-image'
+
+docker {
+  dockerModuleType = DELIVERABLE_IMAGE
+}

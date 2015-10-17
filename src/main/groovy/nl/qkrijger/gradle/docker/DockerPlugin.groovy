@@ -125,10 +125,6 @@ class DockerPlugin implements Plugin<Project> {
   }
 
   private void filterInternalTasksToRun() {
-    Closure<Boolean> isRootProject = {
-      project.rootProject == project
-    }
-
     Closure<Boolean> shouldRunDockerCompose = {
       def dependsOnComposeProject = project != getComposeProject()
       isModuleType(COMPOSE) ||
@@ -137,13 +133,13 @@ class DockerPlugin implements Plugin<Project> {
     }
 
     Closure<Boolean> shouldBuildImage = {
-      isRootProject() || isModuleType(TEST_IMAGE) || isModuleType(IMAGE)
+      isModuleType(DELIVERABLE_IMAGE) || isModuleType(TEST_IMAGE) || isModuleType(IMAGE)
     }
 
     collectDependencies.onlyIf shouldBuildImage
     buildImage.onlyIf shouldBuildImage
-    tagImage.onlyIf isRootProject
-    pushImage.onlyIf isRootProject
+    tagImage.onlyIf { isModuleType(DELIVERABLE_IMAGE) }
+    pushImage.onlyIf { isModuleType(DELIVERABLE_IMAGE) }
     generateComposeFile.onlyIf shouldRunDockerCompose
     runCompose.onlyIf shouldRunDockerCompose
     stopCompose.onlyIf shouldRunDockerCompose

@@ -11,12 +11,19 @@ buildscript {
 }
 apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
 
+version = '1.1-SNAPSHOT'
 docker.imageName = 'my-image'
 
 docker {
   dockerModuleType = DELIVERABLE_IMAGE
 }
 
-afterEvaluate {
-  tasks.check.dependsOn tasks.tagImage
+allprojects { currentProject ->
+  currentProject.tasks.pushImage.deleteAllActions() << {
+    println "Overwrote push action for test. Would otherwise now push ${currentProject.docker.fullImageName}"
+  }
+
+  afterEvaluate {
+    currentProject.tasks.check.dependsOn currentProject.tasks.pushImage
+  }
 }

@@ -1,3 +1,5 @@
+import static nl.qkrijger.gradle.docker.DockerModuleType.*
+
 buildscript {
   repositories {
     maven { url = "file://${project.projectDir}/../../../../build/repoForTests" }
@@ -12,6 +14,9 @@ apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
 version = '1.1-SNAPSHOT'
 docker.imageName = 'my-image'
 
+docker {
+  dockerModuleType = DELIVERABLE_IMAGE
+}
 tasks.tagImage.doLast {
   if (!project.docker.fullImageName) {
     throw new IllegalStateException('docker.fullImageName has not been set, which is what we are testing for -> fail')

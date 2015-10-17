@@ -1,4 +1,4 @@
-buildscript {
+import static nl.qkrijger.gradle.docker.DockerModuleType.*  buildscript {
   repositories {
     maven { url = "file://${project.projectDir}/../../../../build/repoForTests" }
     mavenCentral()
@@ -8,3 +8,8 @@ buildscript {
   }
 }
 apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
+
+docker {
+  dockerModuleType = IMAGE
+}
+

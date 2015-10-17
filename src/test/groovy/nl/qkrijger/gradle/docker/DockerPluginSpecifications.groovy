@@ -62,7 +62,7 @@ class DockerPluginSpecifications extends Specification {
 
     then:
     output.process.exitValue() != 0
-    output.standardErr.contains 'You cannot push a "root" repository. Please rename your repository to <user>/<repo>'
+    output.standardErr.contains 'You cannot push a "root" repository. Please rename your repository to <user>/<repo> (ex: qkrijger/my-image)'
   }
 
   def 'The runTestImage task runs the test image built in a test-image module against the docker compose setup'() {
@@ -108,13 +108,22 @@ class DockerPluginSpecifications extends Specification {
     output.standardOut.contains 'Serving frontend'
   }
 
-  def 'Multiple test suites can use the same docker compose setup'() {
+  def 'The root project does not need to do anything per se'() {
     when:
-    GradleOutput output = runGradleTask('compose-dependency')
+    GradleOutput output = runGradleTask('root-no-module-type')
 
     then:
     output.process.exitValue() == 0
-    output.standardOut.contains 'Serving frontend'
+  }
+
+  def "Multiple modules can be a deliverable image, resulting in multiple pushes."() {
+    when:
+    GradleOutput output = runGradleTask('multiple-deliverable-images', NO_STACKTRACE)
+
+    then:
+    output.process.exitValue() == 0
+    output.standardOut.contains 'Overwrote push action for test. Would otherwise now push my-image:1.1-SNAPSHOT'
+    output.standardOut.contains 'Overwrote push action for test. Would otherwise now push my-second-image:1.1-SNAPSHOT'
   }
   
   private GradleOutput runGradleTask(String project, boolean printStacktrace = true) {

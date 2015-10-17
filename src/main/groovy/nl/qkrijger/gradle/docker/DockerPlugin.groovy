@@ -1,5 +1,6 @@
 package nl.qkrijger.gradle.docker
 import nl.qkrijger.gradle.docker.tasks.*
+import org.gradle.api.PathValidation
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -44,6 +45,8 @@ class DockerPlugin implements Plugin<Project> {
       }
     }
 
+    loadBaseComposeStackIfItExists()
+
     registerInternalTasks()
     orderInternalTasks()
     filterInternalTasksToRun()
@@ -56,9 +59,7 @@ class DockerPlugin implements Plugin<Project> {
     }
 
     project.afterEvaluate {
-      if (project.parent) {
-        project.parent.docker.modules["${project.name}"] = getDockerModuleType()
-      }
+      getComposeProject().docker.modules["${project.name}"] = getDockerModuleType()
       coupleComposeTasksToRelatedModulesBuildTasks()
       coupleTestTasksToComposeModule()
     }
@@ -79,9 +80,15 @@ class DockerPlugin implements Plugin<Project> {
   }
 
   private void registerHookTasks() {
-    dockerTest = project.task(HookTaskNames.DOCKER_TEST_TASK_NAME)
-    dockerTestStart = project.task(HookTaskNames.DOCKER_TEST_START_TASK_NAME)
-    dockerCheck = project.task(HookTaskNames.DOCKER_CHECK_TASK_NAME)
+    dockerTest = project.task(HookTaskNames.DOCKER_TEST_TASK_NAME) {
+      group = 'Docker'
+    }
+    dockerTestStart = project.task(HookTaskNames.DOCKER_TEST_START_TASK_NAME) {
+      group = 'Docker'
+    }
+    dockerCheck = project.task(HookTaskNames.DOCKER_CHECK_TASK_NAME) {
+      group = 'Docker'
+    }
   }
 
   private void registerInternalTasks() {
@@ -161,6 +168,13 @@ class DockerPlugin implements Plugin<Project> {
     if (composeProject != project) {
       project.tasks.dockerTestStart.dependsOn composeProject.tasks.dockerTestStart
       composeProject.tasks.dockerTest.dependsOn project.tasks.dockerTest
+    }
+  }
+
+  private void loadBaseComposeStackIfItExists() {
+    def file = project.file('docker-compose.yml', PathValidation.NONE)
+    if (file.exists()) {
+      project.docker.baseComposeStack = file.getText('UTF-8')
     }
   }
 

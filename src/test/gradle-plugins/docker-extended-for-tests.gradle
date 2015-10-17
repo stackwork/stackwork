@@ -12,7 +12,8 @@ allprojects { currentProject ->
   docker {
     stopContainers = !travisBuild
   }
-
+}
+allprojects { currentProject ->
   afterEvaluate {
     if (!currentProject.tasks.hasProperty('check')) {
       currentProject.task('check').dependsOn currentProject.tasks.dockerCheck
@@ -28,15 +29,8 @@ allprojects { currentProject ->
     }
     currentProject.tasks.buildImage.finalizedBy cleanupTask
 
-    cleanupTask.mustRunAfter currentProject.tasks.dockerTest
-
-    Project parentOrSelf = currentProject.parent ?: currentProject
-    parentOrSelf.allprojects { otherProject ->
-      otherProject.getAllTasks(true).values().each { taskSet ->
-        taskSet.findAll({ task -> task.group == 'Docker' || task.name == 'test' }).each { dockerTask ->
-          cleanupTask.mustRunAfter dockerTask
-        }
-      }
+    currentProject.rootProject.getAllTasks(true).values().flatten().findAll({ task -> task.group == 'Docker' }).each {
+      cleanupTask.mustRunAfter it
     }
   }
 }

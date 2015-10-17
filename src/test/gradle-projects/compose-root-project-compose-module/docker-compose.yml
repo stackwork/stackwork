@@ -1,0 +1,4 @@
+service:
+  image: qkrijger/hello-world-wiremock-server:0.1.0-SNAPSHOT
+  ports:
+  - 80

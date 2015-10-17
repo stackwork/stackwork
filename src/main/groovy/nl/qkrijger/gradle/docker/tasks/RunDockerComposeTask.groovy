@@ -1,6 +1,8 @@
 package nl.qkrijger.gradle.docker.tasks
 
+import nl.qkrijger.gradle.docker.DockerExtension
 import nl.qkrijger.gradle.docker.DockerModuleType
+import org.gradle.api.Project
 import org.gradle.api.internal.AbstractTask
 import org.yaml.snakeyaml.Yaml
 
@@ -91,10 +93,11 @@ class RunDockerComposeTask extends AbstractTask {
   }
 
   boolean isExecutableImage(String serviceName) {
-    boolean serviceImageIsBuiltInModule = project.parent.docker.modules["$serviceName"]
+    Project composeProject = project.extensions.getByType(DockerExtension).composeProject
+    boolean serviceImageIsBuiltInModule = composeProject.docker.modules["$serviceName"]
     if (!serviceImageIsBuiltInModule) return false
 
-    DockerModuleType moduleType = project.parent.docker.modules["$serviceName"]
+    DockerModuleType moduleType = composeProject.docker.modules["$serviceName"]
     moduleType == TEST_IMAGE
   }
 

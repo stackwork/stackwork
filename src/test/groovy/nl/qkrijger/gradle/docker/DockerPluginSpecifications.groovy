@@ -125,7 +125,23 @@ class DockerPluginSpecifications extends Specification {
     output.standardOut.contains 'Overwrote push action for test. Would otherwise now push my-image:1.1-SNAPSHOT'
     output.standardOut.contains 'Overwrote push action for test. Would otherwise now push my-second-image:1.1-SNAPSHOT'
   }
-  
+
+  def "The root project can be a Docker Compose module, with a bas docker compose stack"() {
+    when:
+    GradleOutput output = runGradleTask('compose-root-project')
+
+    then:
+    output.process.exitValue() == 0
+  }
+
+  def "The root project can have a base docker compose stack that can be used by a compose module"() {
+    when:
+    GradleOutput output = runGradleTask('compose-root-project-compose-module')
+
+    then:
+    output.process.exitValue() == 0
+  }
+
   private GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
     def proc = "./gradlew clean check cleanup -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()

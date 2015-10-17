@@ -10,6 +10,7 @@ import static nl.qkrijger.gradle.docker.DockerModuleType.*
 
 class DockerPlugin implements Plugin<Project> {
 
+  private static final boolean RECURSIVE = true
   private Project project
 
   private Task dockerTest
@@ -28,7 +29,6 @@ class DockerPlugin implements Plugin<Project> {
 
   @Override
   void apply(Project project) {
-
     this.project = project
 
     project.ext.docker = [:]
@@ -58,10 +58,9 @@ class DockerPlugin implements Plugin<Project> {
       project.plugins.apply(DockerJavaPlugin)
     }
 
-    project.afterEvaluate {
+    project.gradle.projectsEvaluated {
       getComposeProject().docker.modules["${project.name}"] = getDockerModuleType()
       coupleComposeTasksToRelatedModulesBuildTasks()
-      coupleTestTasksToComposeModule()
     }
   }
 
@@ -110,12 +109,14 @@ class DockerPlugin implements Plugin<Project> {
   private void setupHooksIntoInternalTasks() {
     dockerCheck.dependsOn dockerTest, cleanCompose
 
-    dockerTestStart.dependsOn runCompose
     dockerTest.dependsOn dockerTestStart
-    stopCompose.mustRunAfter dockerTest
+    project.gradle.projectsEvaluated {
+      dockerTestStart.dependsOn getComposeProject().tasks.getByName(RunDockerComposeTask.NAME)
+      getComposeProject().tasks.getByName(StopDockerComposeTask.NAME).mustRunAfter dockerTest
+    }
     runCompose.finalizedBy cleanCompose
 
-    tagImage.dependsOn dockerCheck
+    tagImage.dependsOn project.getTasksByName('dockerCheck', RECURSIVE)
 
     runTestImage.dependsOn dockerTestStart
     dockerTest.dependsOn runTestImage
@@ -157,18 +158,7 @@ class DockerPlugin implements Plugin<Project> {
   private void coupleComposeTasksToRelatedModulesBuildTasks() {
     Project parentOrSelf = project.parent ?: project
     // make docker-compose run after all sibling and child projects have built their images
-    def relevantBuildImageTasks = parentOrSelf.getTasksByName(BuildImageTask.NAME, true)
-    if (!relevantBuildImageTasks.empty) {
-      generateComposeFile.dependsOn relevantBuildImageTasks
-    }
-  }
-
-  private void coupleTestTasksToComposeModule() {
-    def composeProject = getComposeProject()
-    if (composeProject != project) {
-      project.tasks.dockerTestStart.dependsOn composeProject.tasks.dockerTestStart
-      composeProject.tasks.dockerTest.dependsOn project.tasks.dockerTest
-    }
+    generateComposeFile.dependsOn parentOrSelf.getTasksByName(BuildImageTask.NAME, RECURSIVE)
   }
 
   private void loadBaseComposeStackIfItExists() {
@@ -178,14 +168,23 @@ class DockerPlugin implements Plugin<Project> {
     }
   }
 
+  /**
+   * depends on extension, so must be called after evaluation
+   */
   private boolean isModuleType(DockerModuleType moduleType) {
     getDockerModuleType() == moduleType
   }
 
+  /**
+   * depends on extension, so must be called after evaluation
+   */
   private DockerModuleType getDockerModuleType() {
     project.extensions.getByType(DockerExtension).dockerModuleType
   }
 
+  /**
+   * depends on extension, so must be called after evaluation
+   */
   private Project getComposeProject() {
     project.extensions.getByType(DockerExtension).composeProject
   }

@@ -18,12 +18,11 @@ docker {
   dockerModuleType = DELIVERABLE_IMAGE
 }
 
-allprojects { currentProject ->
-  currentProject.tasks.pushImage.deleteAllActions() << {
-    println "Overwrote push action for test. Would otherwise now push ${currentProject.docker.fullImageName}"
-  }
-
-  afterEvaluate {
+afterEvaluate {
+  allprojects { currentProject ->
+    currentProject.tasks.pushImage.deleteAllActions() << {
+      println "Overwrote push action for test. Would otherwise now push ${currentProject.docker.fullImageName}"
+    }
     currentProject.tasks.check.dependsOn currentProject.tasks.pushImage
   }
 }

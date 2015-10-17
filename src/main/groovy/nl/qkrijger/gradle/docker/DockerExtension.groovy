@@ -35,4 +35,15 @@ class DockerExtension {
     this.composeProject = this.project
   }
 
+
+  @Override
+  public String toString() {
+    return "DockerExtension{" +
+            "stopContainers=" + stopContainers +
+            ", dockerModuleType=" + dockerModuleType +
+            ", composeProject=" + composeProject +
+            ", imageName='" + imageName + '\'' +
+            ", project=" + project +
+            '}';
+  }
 }

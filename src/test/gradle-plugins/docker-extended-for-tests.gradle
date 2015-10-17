@@ -1,3 +1,5 @@
+apply plugin: 'docker'
+
 allprojects {
   repositories {
     jcenter()
@@ -7,20 +9,18 @@ allprojects {
 def travisBuild = System.getenv('TRAVIS_BRANCH') != null
 logger.info "Running on Travis: '$travisBuild'"
 
-allprojects { currentProject ->
-  apply plugin: 'docker'
+allprojects {
   docker {
     stopContainers = !travisBuild
   }
 }
-allprojects { currentProject ->
-  afterEvaluate {
+afterEvaluate {
+  allprojects { currentProject ->
+
     if (!currentProject.tasks.hasProperty('check')) {
       currentProject.task('check').dependsOn currentProject.tasks.dockerCheck
     }
-  }
 
-  afterEvaluate {
     Task cleanupTask = currentProject.task('cleanup', description: 'Remove the test docker image by id,', type: Exec) {
       commandLine 'docker', 'rmi', "-f" , "${-> currentProject.docker.imageId}"
     }

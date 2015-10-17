@@ -1,6 +1,7 @@
 import static nl.qkrijger.gradle.docker.DockerModuleType.*
 
 apply plugin: 'groovy'
+apply plugin: 'docker'
 
 docker {
   dockerModuleType = IMAGE

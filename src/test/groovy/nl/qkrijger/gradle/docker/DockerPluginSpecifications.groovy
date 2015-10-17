@@ -30,7 +30,7 @@ class DockerPluginSpecifications extends Specification {
     output.process.exitValue() == 0
   }
 
-  def "The tag image task tags a built image with 'docker.imageName:project.version' number, which is exposed as 'docker.fullImageName'"() {
+  def "The tag image task tags a built image with 'docker {imageName}:project.version' number, which is exposed as 'docker.fullImageName'"() {
     when:
     GradleOutput output = runGradleTask('tag')
 
@@ -47,13 +47,13 @@ class DockerPluginSpecifications extends Specification {
     output.standardErr.contains 'No project version defined. Cannot tag image. Please set "project.version".'
   }
 
-  def "Tagging an image does not work if the docker.imageName is not set"() {
+  def "Tagging an image does not work if the docker { imageName } is not set"() {
     when:
     GradleOutput output = runGradleTask('tag-no-image-name', NO_STACKTRACE)
 
     then:
     output.process.exitValue() != 0
-    output.standardErr.contains 'No docker image name defined. Cannot tag image. Please set "docker.imageName".'
+    output.standardErr.contains 'No docker image name defined. Cannot tag image. Please set "docker { imageName }".'
   }
 
   def "The push image task tries to push an image."() {

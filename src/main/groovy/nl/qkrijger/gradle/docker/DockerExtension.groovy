@@ -21,6 +21,12 @@ class DockerExtension {
    */
   Project composeProject
 
+  /**
+   * Name of the image. E.g. repo:1234/namespace/name. The name should not contain a version, because this name will be
+   * concatenated with the project.version to create the full name.
+   */
+  String imageName
+
 
   private Project project
 

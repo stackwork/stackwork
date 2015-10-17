@@ -24,7 +24,9 @@ For tagging, make sure your image has a name and a version:
 
     // build.gradle
     version = '1.1-SNAPSHOT'
-    docker.imageName = 'my-image'
+    docker {
+      imageName = 'my-image'
+    }
 
 Run by calling the Gradle `pushImage` task.
 
@@ -116,20 +118,22 @@ Dependency: stopDockerCompose
                                
 ### Gradle task tagImage
 
-The `tagImage` task tags the image built during `buildImage` with the `project.version` (as tag) and `docker.imageName`
-(as name). The task will fail in case `project.version` or `docker.imageName` doesn't exist.
+The `tagImage` task tags the image built during `buildImage` with the `project.version` (as tag) and 
+`docker { imageName }` (as name). The task will fail in case `project.version` or `docker { imageName }` doesn't exist.
 The full image name including tag is exposed to Gradle via the docker object.
 E.g. the `build.gradle` can contain:
 
     version = '1.1-SNAPSHOT'
-    docker.imageName = 'my-image'
+    docker {
+      imageName = 'my-image'
+    }
 
 Dependency: buildImage
 
 ### Gradle task pushImage
 
 The `pushImage` task pushes the image tagged during `tagImage`. All logic for repositories, namespaces etc. comes from
-the `docker.imageName`.
+the `docker { imageName }`.
 
 Dependency: tagImage
 

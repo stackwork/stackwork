@@ -6,16 +6,19 @@ Gradle plugin for building, testing and deploying Docker images using docker com
 
 For any of the use cases below, your projects gradle file should include the plugin:
 
-    // build.gradle
+    // in your root project:
     buildscript {
       repositories {
+        // for releases and release candidates:
         jcenter()
+        // for snapshots:
+        maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
       }
       dependencies {
-        classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: '0.3'
+        classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: 'x.x.x[-rc.x][-SNAPSHOT]'
       }
     }
-    apply plugin: 'groovy'
+    // apply the plugin to every gradle project (i.e. subprojects that function as a docker module as well):
     apply plugin: 'docker'
 
 ### Building, tagging and pushing an image
@@ -140,6 +143,7 @@ Dependency: tagImage
 ## Get the plugin
 
 The plugin is currently released to [Bintray][bt], while snapshots are pushed to [JFrog][jf] under [builds][jfb].
+See the top of this document for a `build.gradle` example of applying the plugin.
 
 [bt]: https://bintray.com/qkrijger/gradle-plugins/docker-gradle
 [jf]: https://oss.jfrog.org

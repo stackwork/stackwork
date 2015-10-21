@@ -25,7 +25,16 @@ afterEvaluate {
       commandLine 'docker', 'rmi', "-f" , "${-> currentProject.docker.imageId}"
     }
     cleanupTask.onlyIf {
-      currentProject.extensions.docker.stopContainers && currentProject.tasks.buildImage.didWork
+      if (!currentProject.extensions.docker.stopContainers || !currentProject.tasks.buildImage.didWork) {
+        return false
+      }
+      def imageId = currentProject.docker.imageId
+      def imageExists = project.exec {
+        setCommandLine(['docker', 'inspect', imageId])
+        setStandardOutput(new ByteArrayOutputStream())
+        setIgnoreExitValue(true)
+      }.exitValue == 0
+      imageExists
     }
     currentProject.tasks.buildImage.finalizedBy cleanupTask
 
@@ -34,4 +43,3 @@ afterEvaluate {
     }
   }
 }
-

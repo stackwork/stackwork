@@ -142,6 +142,15 @@ class DockerPluginSpecifications extends Specification {
     output.process.exitValue() == 0
   }
 
+  def "An image build may depend on that of another module"() {
+    when:
+    GradleOutput output = runGradleTask('build-depending-on-build')
+
+    then:
+    output.process.exitValue() == 0
+    output.standardOut.contains 'metadata-proving-we-extended-a-base-image'
+  }
+
   private GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
     def proc = "./gradlew clean check cleanup -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()

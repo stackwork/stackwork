@@ -22,6 +22,11 @@ class DockerExtension {
   Project composeProject
 
   /**
+   * The project on which this projects image build depends. Defaults to null, meaning no dependency
+   */
+  Project baseImageProject
+
+  /**
    * Name of the image. E.g. repo:1234/namespace/name. The name should not contain a version, because this name will be
    * concatenated with the project.version to create the full name.
    */
@@ -42,6 +47,7 @@ class DockerExtension {
             "stopContainers=" + stopContainers +
             ", dockerModuleType=" + dockerModuleType +
             ", composeProject=" + composeProject +
+            ", baseImageProject=" + baseImageProject +
             ", imageName='" + imageName + '\'' +
             ", project=" + project +
             '}';

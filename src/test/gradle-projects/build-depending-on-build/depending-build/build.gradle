@@ -1,0 +1,20 @@
+import static nl.qkrijger.gradle.docker.DockerModuleType.*
+
+apply plugin: 'docker'
+
+docker {
+  dockerModuleType = IMAGE
+  baseImageProject = rootProject
+}
+
+task('inspectImage',
+        description: 'Inspect the image. If this works, and we see the expected metadata, we know it has been built.',
+        group: 'Docker',
+        type: Exec) {
+  commandLine 'docker', 'inspect', "${-> project.docker.imageId}"
+}
+
+tasks.inspectImage.dependsOn tasks.buildImage
+afterEvaluate {
+  tasks.dockerCheck.dependsOn tasks.inspectImage
+}

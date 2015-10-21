@@ -18,6 +18,7 @@ class DockerPlugin implements Plugin<Project> {
   private Task dockerCheck
 
   private Task collectDependencies
+  private Task prepareDockerFile
   private Task buildImage
   private Task cleanCompose
   private Task runCompose
@@ -34,6 +35,7 @@ class DockerPlugin implements Plugin<Project> {
     project.ext.docker = [:]
     project.docker.services = [:]
     project.docker.modules = [:]
+    project.docker.buildDir = "${project.buildDir}/docker-plugin"
 
     evaluateEnvironment()
 
@@ -61,6 +63,7 @@ class DockerPlugin implements Plugin<Project> {
     project.gradle.projectsEvaluated {
       getComposeProject().docker.modules["${project.name}"] = getDockerModuleType()
       coupleComposeTasksToRelatedModulesBuildTasks()
+      coupleGenerateDockerfileToBuildOfBaseImage()
     }
   }
 
@@ -96,6 +99,7 @@ class DockerPlugin implements Plugin<Project> {
     }
 
     collectDependencies = createTask(CollectImageDependenciesTask)
+    prepareDockerFile = createTask(PrepareDockerFileTask)
     buildImage = createTask(BuildImageTask)
     tagImage = createTask(TagImageTask)
     pushImage = createTask(PushImageTask)
@@ -116,14 +120,14 @@ class DockerPlugin implements Plugin<Project> {
     }
     runCompose.finalizedBy cleanCompose
 
-    tagImage.dependsOn project.getTasksByName('dockerCheck', RECURSIVE)
+    tagImage.dependsOn project.getTasksByName(HookTaskNames.DOCKER_CHECK_TASK_NAME, RECURSIVE)
 
     runTestImage.dependsOn dockerTestStart
     dockerTest.dependsOn runTestImage
   }
 
   private void orderInternalTasks() {
-    buildImage.dependsOn collectDependencies
+    buildImage.dependsOn collectDependencies, prepareDockerFile
     tagImage.dependsOn buildImage
     pushImage.dependsOn tagImage
     generateComposeFile.dependsOn buildImage
@@ -155,6 +159,13 @@ class DockerPlugin implements Plugin<Project> {
     runTestImage.onlyIf { isModuleType(TEST_IMAGE) }
   }
 
+  private void coupleGenerateDockerfileToBuildOfBaseImage() {
+    def baseImageProject = getBaseImageProject()
+    if (baseImageProject) {
+      prepareDockerFile.dependsOn baseImageProject.tasks["${BuildImageTask.NAME}"]
+    }
+  }
+
   private void coupleComposeTasksToRelatedModulesBuildTasks() {
     Project parentOrSelf = project.parent ?: project
     // make docker-compose run after all sibling and child projects have built their images
@@ -180,6 +191,13 @@ class DockerPlugin implements Plugin<Project> {
    */
   private DockerModuleType getDockerModuleType() {
     project.extensions.getByType(DockerExtension).dockerModuleType
+  }
+
+  /**
+   * depends on extension, so must be called after evaluation
+   */
+  private Project getBaseImageProject() {
+    project.extensions.getByType(DockerExtension).baseImageProject
   }
 
   /**

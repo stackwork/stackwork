@@ -1,0 +1,2 @@
+FROM ${rootProject.docker.imageId}
+MAINTAINER metadata-proving-we-extended-a-base-image

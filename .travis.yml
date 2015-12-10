@@ -1,5 +1,6 @@
 sudo: required
-services: docker
+services: 
+  - docker
 jdk: oraclejdk8
 language: groovy
 

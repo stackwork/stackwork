@@ -79,7 +79,7 @@ pluginBundle {
   tags = ['gradle', 'docker', 'plugin', 'ci', 'stackwork']
 
   plugins {
-    greetingsPlugin {
+    stackworkPlugin {
       id = 'stackwork'
       displayName = 'Stackwork Gradle plugin'
     }

@@ -1,0 +1,5 @@
+# Name of your site (displayed in the header)
+name: Stackwork
+
+gems:
+  - jekyll-sitemap

@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/Krijger/docker-gradle.svg?branch=master)](https://travis-ci.org/Krijger/docker-gradle)
-# docker-gradle
+# Stackwork
 Gradle plugin to integrate Docker into your project.
 It uses **Docker Compose** to easily define application stack definitions.
 
@@ -57,7 +57,7 @@ For any of the use cases below, your projects gradle file should include the plu
         maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
       }
       dependencies {
-        classpath group: 'nl.qkrijger.gradle', name: 'docker-gradle', version: 'x.x.x[-rc.x][-SNAPSHOT]'
+        classpath group: 'org.stackwork.gradle', name: 'stackwork', version: 'x.x.x[-rc.x][-SNAPSHOT]'
       }
     }
     // apply the plugin to every gradle project (i.e. subprojects that function as a docker module as well):
@@ -187,6 +187,6 @@ Dependency: tagImage
 The plugin is currently released to [Bintray][bt], while snapshots are pushed to [JFrog][jf] under [builds][jfb].
 See the top of this document for a `build.gradle` example of applying the plugin.
 
-[bt]: https://bintray.com/qkrijger/gradle-plugins/docker-gradle
+[bt]: https://bintray.com/stackwork/gradle-plugins/stackwork
 [jf]: https://oss.jfrog.org
-[jfb]: https://oss.jfrog.org/artifactory/webapp/#/builds/docker-gradle
+[jfb]: https://oss.jfrog.org/artifactory/webapp/#/builds/stackwork

@@ -1,4 +1,4 @@
-import static nl.qkrijger.gradle.docker.DockerModuleType.*
+import static org.stackwork.gradle.docker.DockerModuleType.*
 
 apply plugin: 'docker'
 

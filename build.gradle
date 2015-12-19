@@ -19,7 +19,7 @@ plugins {
 }
 apply from: './src/test/gradle-plugins/colored-test-output.gradle'
 
-group = 'nl.qkrijger.gradle'
+group = 'org.stackwork.gradle'
 
 contacts {
   'qkrijger@gmail.com' {
@@ -51,14 +51,14 @@ repositories {
 
 bintray {
   pkg {
-    userOrg = 'qkrijger'
+    userOrg = 'stackwork'
     repo = 'gradle-plugins'
-    name = 'docker-gradle'
+    name = 'stackwork'
     desc = project.description
     licenses = ['Apache-2.0']
-    vcsUrl = 'https://github.com/Krijger/docker-gradle.git'
-    websiteUrl = 'https://github.com/Krijger/docker-gradle'
-    issueTrackerUrl = 'https://github.com/Krijger/docker-gradle/issues'
+    vcsUrl = 'https://github.com/stackwork/stackwork.git'
+    websiteUrl = 'https://www.stackwork.org'
+    issueTrackerUrl = 'https://github.com/stackwork/stackwork/issues'
     labels = ['gradle', 'docker', 'plugin', 'ci']
   }
 }

@@ -1,4 +1,12 @@
-buildscript { repositories { jcenter() } } // Some plugin dependencies (namely JFrog) are not in Maven Central
+buildscript {
+  repositories {
+    // jcenter is needed for jfrog dependencies
+    jcenter()
+//    maven {
+//      url "https://plugins.gradle.org/m2/"
+//    }
+  }
+}
 
 plugins {
   id 'groovy'
@@ -16,6 +24,7 @@ plugins {
 
   id 'nebula.nebula-bintray' version '3.1.0'
 
+  id "com.gradle.plugin-publish" version "0.9.2"
 }
 apply from: './src/test/gradle-plugins/colored-test-output.gradle'
 
@@ -60,6 +69,20 @@ bintray {
     websiteUrl = 'https://www.stackwork.org'
     issueTrackerUrl = 'https://github.com/stackwork/stackwork/issues'
     labels = ['gradle', 'docker', 'plugin', 'ci']
+  }
+}
+
+pluginBundle {
+  website = 'https://www.stackwork.org'
+  vcsUrl = 'https://github.com/stackwork/stackwork.git'
+  description = 'Full stack testing with Docker Compose'
+  tags = ['gradle', 'docker', 'plugin', 'ci']
+
+  plugins {
+    greetingsPlugin {
+      id = 'org.stackwork.gradle'
+      displayName = 'Stackwork Gradle plugin'
+    }
   }
 }
 

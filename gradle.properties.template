@@ -1,0 +1,9 @@
+#These are the keys that are use by Travis, but are encoded in Git
+
+#Bintray: get from https://bintray.com/profile/edit
+bintrayUser=krijger
+bintrayKey=
+
+#Gradle plugin portal, get from https://plugins.gradle.org/u/qkrijger
+gradle.publish.key=
+gradle.publish.secret=

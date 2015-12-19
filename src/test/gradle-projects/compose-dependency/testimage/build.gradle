@@ -1,8 +1,8 @@
-import static org.stackwork.gradle.docker.DockerModuleType.*
+import static org.stackwork.gradle.docker.ModuleType.*
 
-apply plugin: 'docker'
+apply plugin: 'stackwork'
 
-docker {
-  dockerModuleType = TEST_IMAGE
+stackwork {
+  moduleType = TEST_IMAGE
   composeProject = project ':compose'
 }

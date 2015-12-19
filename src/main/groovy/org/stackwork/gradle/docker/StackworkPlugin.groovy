@@ -1,5 +1,5 @@
 package org.stackwork.gradle.docker
-import org.stackwork.gradle.docker.tasks.*
+
 import org.gradle.api.PathValidation
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -17,16 +17,16 @@ import org.stackwork.gradle.docker.tasks.RunTestImageTask
 import org.stackwork.gradle.docker.tasks.StopDockerComposeTask
 import org.stackwork.gradle.docker.tasks.TagImageTask
 
-import static DockerModuleType.*
+import static ModuleType.*
 
-class DockerPlugin implements Plugin<Project> {
+class StackworkPlugin implements Plugin<Project> {
 
   private static final boolean RECURSIVE = true
   private Project project
 
-  private Task dockerTest
-  private Task dockerTestStart
-  private Task dockerCheck
+  private Task stackworkTest
+  private Task stackworkTestStart
+  private Task stackworkCheck
 
   private Task collectDependencies
   private Task prepareDockerFile
@@ -43,17 +43,17 @@ class DockerPlugin implements Plugin<Project> {
   void apply(Project project) {
     this.project = project
 
-    project.ext.docker = [:]
-    project.docker.services = [:]
-    project.docker.modules = [:]
-    project.docker.buildDir = "${project.buildDir}/docker-plugin"
+    project.ext.stackwork = [:]
+    project.stackwork.services = [:]
+    project.stackwork.modules = [:]
+    project.stackwork.buildDir = "${project.buildDir}/stackwork-plugin"
 
     evaluateEnvironment()
 
-    project.extensions.create('docker', DockerExtension, project)
+    project.extensions.create('stackwork', StackworkExtension, project)
 
     project.configurations {
-      docker {
+      stackwork {
         description = 'Docker artifacts to be made available for an image build'
       }
     }
@@ -68,11 +68,11 @@ class DockerPlugin implements Plugin<Project> {
     setupHooksIntoInternalTasks()
 
     project.plugins.withType(JavaPlugin) {
-      project.plugins.apply(DockerJavaPlugin)
+      project.plugins.apply(StackworkJavaPlugin)
     }
 
     project.gradle.projectsEvaluated {
-      getComposeProject().docker.modules["${project.name}"] = getDockerModuleType()
+      getComposeProject().stackwork.modules["${project.name}"] = getModuleType()
       coupleComposeTasksToRelatedModulesBuildTasks()
       coupleGenerateDockerfileToBuildOfBaseImage()
     }
@@ -84,7 +84,7 @@ class DockerPlugin implements Plugin<Project> {
       // in case of remote connection to docker daemon
       project.logger.info("DOCKER_HOST system variable with value '$dockerHost' found. Will expose docker " +
               "container forwarded ports and the DOCKER_HOST to the test classes.")
-      project.docker.host = new URI(dockerHost).host
+      project.stackwork.host = new URI(dockerHost).host
     } else {
       // in case of local docker daemon
       project.logger.info('No DOCKER_HOST system variable found. Will expose docker container ips and exposed ports' +
@@ -93,14 +93,14 @@ class DockerPlugin implements Plugin<Project> {
   }
 
   private void registerHookTasks() {
-    dockerTest = project.task(HookTaskNames.DOCKER_TEST_TASK_NAME) {
-      group = 'Docker'
+    stackworkTest = project.task(HookTaskNames.STACKWORK_TEST_TASK_NAME) {
+      group = 'Stackwork'
     }
-    dockerTestStart = project.task(HookTaskNames.DOCKER_TEST_START_TASK_NAME) {
-      group = 'Docker'
+    stackworkTestStart = project.task(HookTaskNames.STACKWORK_TEST_START_TASK_NAME) {
+      group = 'Stackwork'
     }
-    dockerCheck = project.task(HookTaskNames.DOCKER_CHECK_TASK_NAME) {
-      group = 'Docker'
+    stackworkCheck = project.task(HookTaskNames.STACKWORK_CHECK_TASK_NAME) {
+      group = 'Stackwork'
     }
   }
 
@@ -122,19 +122,19 @@ class DockerPlugin implements Plugin<Project> {
   }
 
   private void setupHooksIntoInternalTasks() {
-    dockerCheck.dependsOn dockerTest, cleanCompose
+    stackworkCheck.dependsOn stackworkTest, cleanCompose
 
-    dockerTest.dependsOn dockerTestStart
+    stackworkTest.dependsOn stackworkTestStart
     project.gradle.projectsEvaluated {
-      dockerTestStart.dependsOn getComposeProject().tasks.getByName(RunDockerComposeTask.NAME)
-      getComposeProject().tasks.getByName(StopDockerComposeTask.NAME).mustRunAfter dockerTest
+      stackworkTestStart.dependsOn getComposeProject().tasks.getByName(RunDockerComposeTask.NAME)
+      getComposeProject().tasks.getByName(StopDockerComposeTask.NAME).mustRunAfter stackworkTest
     }
     runCompose.finalizedBy cleanCompose
 
-    tagImage.dependsOn project.getTasksByName(HookTaskNames.DOCKER_CHECK_TASK_NAME, RECURSIVE)
+    tagImage.dependsOn project.getTasksByName(HookTaskNames.STACKWORK_CHECK_TASK_NAME, RECURSIVE)
 
-    runTestImage.dependsOn dockerTestStart
-    dockerTest.dependsOn runTestImage
+    runTestImage.dependsOn stackworkTestStart
+    stackworkTest.dependsOn runTestImage
   }
 
   private void orderInternalTasks() {
@@ -186,36 +186,36 @@ class DockerPlugin implements Plugin<Project> {
   private void loadBaseComposeStackIfItExists() {
     def file = project.file('docker-compose.yml', PathValidation.NONE)
     if (file.exists()) {
-      project.docker.baseComposeStack = file.getText('UTF-8')
+      project.stackwork.baseComposeStack = file.getText('UTF-8')
     }
   }
 
   /**
    * depends on extension, so must be called after evaluation
    */
-  private boolean isModuleType(DockerModuleType moduleType) {
-    getDockerModuleType() == moduleType
+  private boolean isModuleType(ModuleType moduleType) {
+    getModuleType() == moduleType
   }
 
   /**
    * depends on extension, so must be called after evaluation
    */
-  private DockerModuleType getDockerModuleType() {
-    project.extensions.getByType(DockerExtension).dockerModuleType
+  private ModuleType getModuleType() {
+    project.extensions.getByType(StackworkExtension).getModuleType()
   }
 
   /**
    * depends on extension, so must be called after evaluation
    */
   private Project getBaseImageProject() {
-    project.extensions.getByType(DockerExtension).baseImageProject
+    project.extensions.getByType(StackworkExtension).baseImageProject
   }
 
   /**
    * depends on extension, so must be called after evaluation
    */
   private Project getComposeProject() {
-    project.extensions.getByType(DockerExtension).composeProject
+    project.extensions.getByType(StackworkExtension).composeProject
   }
 
 }

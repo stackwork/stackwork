@@ -1,10 +1,10 @@
-import static org.stackwork.gradle.docker.DockerModuleType.*
+import static org.stackwork.gradle.docker.ModuleType.*
 
 apply plugin: 'groovy'
-apply plugin: 'docker'
+apply plugin: 'stackwork'
 
-docker {
-  dockerModuleType = TEST
+stackwork {
+  moduleType = TEST
   composeProject = project.project ':compose'
 }
 

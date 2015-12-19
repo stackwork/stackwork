@@ -1,2 +1,2 @@
 FROM scratch
-COPY build/docker-deps /
+COPY build/stackwork-deps /

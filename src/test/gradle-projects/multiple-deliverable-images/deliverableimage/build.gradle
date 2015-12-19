@@ -1,10 +1,10 @@
-import static org.stackwork.gradle.docker.DockerModuleType.*
+import static org.stackwork.gradle.docker.ModuleType.*
 
-apply plugin: 'docker'
+apply plugin: 'stackwork'
 
 version = '1.1-SNAPSHOT'
 
-docker {
+stackwork {
   imageName = 'my-second-image'
-  dockerModuleType = DELIVERABLE_IMAGE
+  moduleType = DELIVERABLE_IMAGE
 }

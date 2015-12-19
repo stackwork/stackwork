@@ -1,4 +1,4 @@
-import static org.stackwork.gradle.docker.DockerModuleType.*
+import static org.stackwork.gradle.docker.ModuleType.*
 
 buildscript {
   repositories {
@@ -9,20 +9,20 @@ buildscript {
     classpath group: 'org.stackwork.gradle', name: 'stackwork', version: '0.1-TEST'
   }
 }
-apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
+apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
 
-docker {
-  dockerModuleType = IMAGE
+stackwork {
+  moduleType = IMAGE
 }
 
 task('inspectImage',
         description: 'Inspect the image. If this works, we know it has been built.',
-        group: 'Docker',
+        group: 'Stackwork',
         type: Exec) {
-  commandLine 'docker', 'inspect', '--format=\'{{.Id}}\'', "${-> project.docker.imageId}"
+  commandLine 'docker', 'inspect', '--format=\'{{.Id}}\'', "${-> project.stackwork.imageId}"
 }
 
 tasks.inspectImage.dependsOn tasks.buildImage
 afterEvaluate {
-  tasks.dockerCheck.dependsOn tasks.inspectImage
+  tasks.stackworkCheck.dependsOn tasks.inspectImage
 }

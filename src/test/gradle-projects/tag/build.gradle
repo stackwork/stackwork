@@ -1,4 +1,4 @@
-import static org.stackwork.gradle.docker.DockerModuleType.*
+import static org.stackwork.gradle.docker.ModuleType.*
 
 buildscript {
   repositories {
@@ -9,17 +9,17 @@ buildscript {
     classpath group: 'org.stackwork.gradle', name: 'stackwork', version: '0.1-TEST'
   }
 }
-apply from: '../../gradle-plugins/docker-extended-for-tests.gradle'
+apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
 
 version = '1.1-SNAPSHOT'
 
-docker {
+stackwork {
   imageName = 'my-image'
-  dockerModuleType = DELIVERABLE_IMAGE
+  moduleType = DELIVERABLE_IMAGE
 }
 tasks.tagImage.doLast {
-  if (!project.docker.fullImageName) {
-    throw new IllegalStateException('docker.fullImageName has not been set, which is what we are testing for -> fail')
+  if (!project.stackwork.fullImageName) {
+    throw new IllegalStateException('stackwork.fullImageName has not been set, which is what we are testing for -> fail')
   }
 }
 

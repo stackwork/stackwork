@@ -1,4 +1,4 @@
 service:
-  image: ${project.project(':service').docker.imageId}
+  image: ${project.project(':service').stackwork.imageId}
   ports:
   - 80

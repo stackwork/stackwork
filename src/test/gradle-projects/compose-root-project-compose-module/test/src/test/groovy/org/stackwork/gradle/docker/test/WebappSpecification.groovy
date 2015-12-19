@@ -6,10 +6,10 @@ import javax.ws.rs.client.ClientBuilder
 
 class WebappSpecification extends Specification {
 
-  def dockerContainerHost = System.properties.getProperty('docker.service.host')
-  def dockerContainerPort = System.properties.getProperty('docker.service.port')
+  def containerHost = System.properties.getProperty('stackwork.service.host')
+  def containerPort = System.properties.getProperty('stackwork.service.port')
 
-  def service = ClientBuilder.newClient().target("http://$dockerContainerHost:$dockerContainerPort")
+  def service = ClientBuilder.newClient().target("http://$containerHost:$containerPort")
 
   def "We can make a request to a web service running in Docker"() {
     when:

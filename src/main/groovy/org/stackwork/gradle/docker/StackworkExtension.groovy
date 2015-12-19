@@ -2,9 +2,9 @@ package org.stackwork.gradle.docker
 
 import org.gradle.api.Project
 
-import static DockerModuleType.DEFAULT
+import static ModuleType.DEFAULT
 
-class DockerExtension {
+class StackworkExtension {
 
   /**
    * Indicates whether containers should be stopped after the tests are executed.
@@ -12,9 +12,9 @@ class DockerExtension {
   Boolean stopContainers = true
 
   /**
-   * Indicates the type of {@link DockerModuleType} of a Gradle sub project
+   * Indicates the type of {@link ModuleType} of a Gradle sub project
    */
-  DockerModuleType dockerModuleType = DEFAULT
+  ModuleType moduleType = DEFAULT
 
   /**
    * The project that contains the docker compose setup for this modules tests. Defaults to the project itself.
@@ -35,7 +35,7 @@ class DockerExtension {
 
   private Project project
 
-  DockerExtension(Project project) {
+    StackworkExtension(Project project) {
     this.project = project
     this.composeProject = this.project
   }
@@ -43,9 +43,9 @@ class DockerExtension {
 
   @Override
   public String toString() {
-    return "DockerExtension{" +
+    return "StackworkExtension{" +
             "stopContainers=" + stopContainers +
-            ", dockerModuleType=" + dockerModuleType +
+            ", moduleType=" + moduleType +
             ", composeProject=" + composeProject +
             ", baseImageProject=" + baseImageProject +
             ", imageName='" + imageName + '\'' +

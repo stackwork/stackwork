@@ -1,20 +1,20 @@
-import static org.stackwork.gradle.docker.DockerModuleType.*
+import static org.stackwork.gradle.docker.ModuleType.*
 
-apply plugin: 'docker'
+apply plugin: 'stackwork'
 
-docker {
-  dockerModuleType = IMAGE
+stackwork {
+  moduleType = IMAGE
   baseImageProject = rootProject
 }
 
 task('inspectImage',
         description: 'Inspect the image. If this works, and we see the expected metadata, we know it has been built.',
-        group: 'Docker',
+        group: 'Stackwork',
         type: Exec) {
-  commandLine 'docker', 'inspect', "${-> project.docker.imageId}"
+  commandLine 'docker', 'inspect', "${-> project.stackwork.imageId}"
 }
 
 tasks.inspectImage.dependsOn tasks.buildImage
 afterEvaluate {
-  tasks.dockerCheck.dependsOn tasks.inspectImage
+  tasks.stackworkCheck.dependsOn tasks.inspectImage
 }

@@ -9,9 +9,9 @@ class BuildImageTask extends Exec {
   BuildImageTask() {
 
     description = 'Builds the Dockerfile in your project root folder.'
-    group = 'Docker'
+    group = 'Stackwork'
 
-    commandLine 'docker', 'build', '--file', "${->project.docker.dockerFile}", project.projectDir
+    commandLine 'docker', 'build', '--file', "${->project.stackwork.dockerFile}", project.projectDir
 
     def buffer = new ByteArrayOutputStream()
     setStandardOutput buffer
@@ -27,7 +27,7 @@ class BuildImageTask extends Exec {
       def imageId = imageIdMatcher.group('imageId')
 
       logger.info 'Docker image id: {}', imageId
-      project.ext.docker.imageId = imageId
+      project.ext.stackwork.imageId = imageId
     }
   }
 }

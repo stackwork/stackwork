@@ -1,6 +1,6 @@
 service:
-  image: ${rootProject.docker.imageId}
+  image: ${rootProject.stackwork.imageId}
 ${name}:
-  image: ${docker.imageId}
+  image: ${stackwork.imageId}
   links:
   - service:server

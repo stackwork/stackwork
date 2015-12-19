@@ -1,4 +1,4 @@
-apply plugin: 'docker'
+apply plugin: 'stackwork'
 
 allprojects {
   repositories {
@@ -10,7 +10,7 @@ def travisBuild = System.getenv('TRAVIS_BRANCH') != null
 logger.info "Running on Travis: '$travisBuild'"
 
 allprojects {
-  docker {
+  stackwork {
     stopContainers = !travisBuild
   }
 }
@@ -18,17 +18,17 @@ afterEvaluate {
   allprojects { currentProject ->
 
     if (!currentProject.tasks.hasProperty('check')) {
-      currentProject.task('check').dependsOn currentProject.tasks.dockerCheck
+      currentProject.task('check').dependsOn currentProject.tasks.stackworkCheck
     }
 
     Task cleanupTask = currentProject.task('cleanup', description: 'Remove the test docker image by id,', type: Exec) {
-      commandLine 'docker', 'rmi', "-f" , "${-> currentProject.docker.imageId}"
+      commandLine 'docker', 'rmi', "-f" , "${-> currentProject.stackwork.imageId}"
     }
     cleanupTask.onlyIf {
-      if (!currentProject.extensions.docker.stopContainers || !currentProject.tasks.buildImage.didWork) {
+      if (!currentProject.extensions.stackwork.stopContainers || !currentProject.tasks.buildImage.didWork) {
         return false
       }
-      def imageId = currentProject.docker.imageId
+      def imageId = currentProject.stackwork.imageId
       def imageExists = project.exec {
         setCommandLine(['docker', 'inspect', imageId])
         setStandardOutput(new ByteArrayOutputStream())
@@ -38,7 +38,7 @@ afterEvaluate {
     }
     currentProject.tasks.buildImage.finalizedBy cleanupTask
 
-    currentProject.rootProject.getAllTasks(true).values().flatten().findAll({ task -> task.group == 'Docker' }).each {
+    currentProject.rootProject.getAllTasks(true).values().flatten().findAll({ task -> task.group == 'Stackwork' }).each {
       cleanupTask.mustRunAfter it
     }
   }

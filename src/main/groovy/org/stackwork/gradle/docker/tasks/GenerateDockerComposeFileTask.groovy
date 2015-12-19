@@ -11,13 +11,13 @@ class GenerateDockerComposeFileTask extends Copy {
     // disable task caching
     outputs.upToDateWhen {false}
 
-    project.docker.composeFile = "${project.docker.buildDir}/docker-compose.yml"
+    project.stackwork.composeFile = "${project.stackwork.buildDir}/docker-compose.yml"
 
-    group = 'Docker'
+    group = 'Stackwork'
     description = 'Generates the Docker Compose file'
 
     from project.projectDir
-    into project.docker.buildDir
+    into project.stackwork.buildDir
     include 'docker-compose.yml.template'
     rename { file -> 'docker-compose.yml' }
     expand(project.properties)

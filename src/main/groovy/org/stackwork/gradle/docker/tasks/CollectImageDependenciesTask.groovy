@@ -8,9 +8,9 @@ class CollectImageDependenciesTask extends Copy {
 
   CollectImageDependenciesTask() {
     description = 'Copies the Docker dependencies to the build folder to make them available during an image build'
-    group = 'Docker'
+    group = 'Stackwork'
 
-    from project.configurations.docker
-    into "${project.buildDir}/docker-deps"
+    from project.configurations.stackwork
+    into "${project.buildDir}/stackwork-deps"
   }
 }

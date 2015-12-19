@@ -1,7 +1,7 @@
 package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.tasks.Exec
-import org.stackwork.gradle.docker.DockerExtension
+import org.stackwork.gradle.docker.StackworkExtension
 
 class StopDockerComposeTask extends Exec {
 
@@ -9,13 +9,13 @@ class StopDockerComposeTask extends Exec {
 
   StopDockerComposeTask() {
     description = 'Stops the docker compose services'
-    group = 'Docker'
+    group = 'Stackwork'
 
     onlyIf {
-      project.extensions.getByType(DockerExtension).stopContainers
+      project.extensions.getByType(StackworkExtension).stopContainers
     }
 
-    commandLine 'docker-compose', '-f', "${->project.docker.composeFile}", '-p', "${->project.docker.composeProject}",
+    commandLine 'docker-compose', '-f', "${->project.stackwork.composeFile}", '-p', "${->project.stackwork.composeProject}",
             'stop'
   }
 

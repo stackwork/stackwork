@@ -3,7 +3,7 @@ package org.stackwork.gradle.docker.tasks
 import org.gradle.api.Project
 import org.gradle.api.internal.AbstractTask
 import org.gradle.api.tasks.Copy
-import org.stackwork.gradle.docker.DockerExtension
+import org.stackwork.gradle.docker.StackworkExtension
 
 class PrepareDockerFileTask extends AbstractTask {
 
@@ -11,7 +11,7 @@ class PrepareDockerFileTask extends AbstractTask {
 
   PrepareDockerFileTask() {
 
-    group = 'Docker'
+    group = 'Stackwork'
     description = 'Prepares the Dockerfile, activates parsing a template if needed'
 
     dependsOn project.task("parseDockerFileTemplate", type: Copy) {
@@ -21,15 +21,15 @@ class PrepareDockerFileTask extends AbstractTask {
       description = 'Parsing the Dockerfile.template'
 
       from project.projectDir
-      into project.docker.buildDir
+      into project.stackwork.buildDir
       include 'Dockerfile.template'
       rename { file -> 'Dockerfile' }
       expand project.properties
     }
 
     doLast {
-      project.docker.dockerFile = dependsOnBaseImage() ?
-              project.file("${project.docker.buildDir}/Dockerfile").absolutePath :
+      project.stackwork.dockerFile = dependsOnBaseImage() ?
+              project.file("${project.stackwork.buildDir}/Dockerfile").absolutePath :
               project.file('Dockerfile').absolutePath
     }
   }
@@ -40,7 +40,7 @@ class PrepareDockerFileTask extends AbstractTask {
   }
 
   Project getBaseImageProject() {
-    project.extensions.getByType(DockerExtension).baseImageProject
+    project.extensions.getByType(StackworkExtension).baseImageProject
   }
 
 }

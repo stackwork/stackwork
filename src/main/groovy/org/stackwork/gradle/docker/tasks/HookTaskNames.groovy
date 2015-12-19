@@ -1,7 +1,7 @@
 package org.stackwork.gradle.docker.tasks
 
 class HookTaskNames {
-  static final DOCKER_TEST_TASK_NAME = 'dockerTest'
-  static final DOCKER_TEST_START_TASK_NAME = 'dockerTestStart'
-  static final DOCKER_CHECK_TASK_NAME = 'dockerCheck'
+  static final STACKWORK_TEST_TASK_NAME = 'stackworkTest'
+  static final STACKWORK_TEST_START_TASK_NAME = 'stackworkTestStart'
+  static final STACKWORK_CHECK_TASK_NAME = 'stackworkCheck'
 }

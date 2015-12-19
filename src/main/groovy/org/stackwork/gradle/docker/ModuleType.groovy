@@ -1,6 +1,6 @@
 package org.stackwork.gradle.docker
 
-enum DockerModuleType {
+enum ModuleType {
 
   /**
    * Only exists to avoid null-checks. No meaning other than that no type has been set explicitly

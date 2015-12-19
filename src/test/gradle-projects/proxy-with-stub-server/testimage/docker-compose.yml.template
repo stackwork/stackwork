@@ -1,12 +1,12 @@
 stubserver:
-  image: ${project.findProject(':stubserver').docker.imageId}
+  image: ${project.findProject(':stubserver').stackwork.imageId}
 
 proxy:
-  image: ${rootProject.docker.imageId}
+  image: ${rootProject.stackwork.imageId}
   links:
   - stubserver:otherhost
 
 ${name}:
-  image: ${docker.imageId}
+  image: ${stackwork.imageId}
   links:
   - proxy:server

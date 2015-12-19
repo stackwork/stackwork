@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Krijger/docker-gradle.svg?branch=master)](https://travis-ci.org/Krijger/docker-gradle)
+[![Build Status](https://travis-ci.org/stackwork/stackwork.svg?branch=master)](https://travis-ci.org/stackwork/stackwork)
 # Stackwork
 Gradle plugin to integrate Docker into your project.
 It uses **Docker Compose** to easily define application stack definitions.

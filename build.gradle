@@ -80,7 +80,7 @@ pluginBundle {
 
   plugins {
     stackworkPlugin {
-      id = 'stackwork'
+      id = 'org.stackwork'
       displayName = 'Stackwork Gradle plugin'
     }
   }

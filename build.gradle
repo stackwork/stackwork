@@ -68,7 +68,7 @@ bintray {
     vcsUrl = 'https://github.com/stackwork/stackwork.git'
     websiteUrl = 'https://www.stackwork.org'
     issueTrackerUrl = 'https://github.com/stackwork/stackwork/issues'
-    labels = ['gradle', 'docker', 'plugin', 'ci', 'stackwork']
+    labels = ['gradle', 'docker', 'plugin', 'ci', 'stackwork', 'docker-compose']
   }
 }
 
@@ -76,7 +76,7 @@ pluginBundle {
   website = 'https://www.stackwork.org'
   vcsUrl = 'https://github.com/stackwork/stackwork.git'
   description = 'Full stack testing with Docker Compose'
-  tags = ['gradle', 'docker', 'plugin', 'ci', 'stackwork']
+  tags = ['gradle', 'docker', 'plugin', 'ci', 'stackwork', 'docker-compose']
 
   plugins {
     stackworkPlugin {

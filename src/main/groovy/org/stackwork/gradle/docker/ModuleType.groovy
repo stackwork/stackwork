@@ -18,7 +18,7 @@ enum ModuleType {
   /**
    * Test image module.
    *
-   * Builds a test image, and run that agains the Docker Compose setup.
+   * Builds a test image, and runs that against the Docker Compose setup.
    */
   TEST_IMAGE,
   /**

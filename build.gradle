@@ -1,10 +1,6 @@
 buildscript {
   repositories {
-    // jcenter is needed for jfrog dependencies
     jcenter()
-//    maven {
-//      url "https://plugins.gradle.org/m2/"
-//    }
   }
 }
 
@@ -45,6 +41,10 @@ contacts {
   }
 }
 
+repositories {
+  jcenter()
+}
+
 dependencies {
   compile gradleApi()
   compile localGroovy()
@@ -54,10 +54,9 @@ dependencies {
   testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.3'
 }
 
-repositories {
-  jcenter()
-}
-
+/**
+ * Configuration for publishing to Bintray: https://bintray.com/stackwork/gradle-plugins/stackwork/
+ */
 bintray {
   pkg {
     userOrg = 'stackwork'
@@ -72,6 +71,9 @@ bintray {
   }
 }
 
+/**
+ * Configuration for publishing to Gradle Plugins: https://plugins.gradle.org/plugin/org.stackwork
+ */
 pluginBundle {
   website = 'https://www.stackwork.org'
   vcsUrl = 'https://github.com/stackwork/stackwork.git'
@@ -86,6 +88,9 @@ pluginBundle {
   }
 }
 
+/**
+ * Upload the build result to a local repositories that is used in the tests
+ */
 uploadArchives {
   repositories {
     mavenDeployer {

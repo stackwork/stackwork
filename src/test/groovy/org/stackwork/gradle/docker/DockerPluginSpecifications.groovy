@@ -160,15 +160,29 @@ class DockerPluginSpecifications extends Specification {
     output.standardOut.contains 'metadata-proving-we-extended-a-base-image'
   }
 
-  private GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
-    def stacktrace = printStacktrace ? '--stacktrace' : ''
-    def proc = "./gradlew clean check cleanup -i $stacktrace --project-dir src/test/gradle-projects/$project".execute()
-    OutputStream standardOut = new ByteArrayOutputStream()
-    OutputStream standardErr = new ByteArrayOutputStream()
-    proc.waitForProcessOutput(standardOut, standardErr)
-    println "<<<<<<<<<<<<<  Standard Out  <<<<<<<<<<<<<<<\n$standardOut"
-    println "<<<<<<<<<<<<<  Standard Err  <<<<<<<<<<<<<<<\n$standardErr"
-    new GradleOutput(proc, standardOut.toString("UTF-8"), standardErr.toString("UTF-8"))
+  def "A compose project can define a log marker indicating the stack has started"() {
+    when:
+    GradleOutput output = runGradleTask('compose-log-marker')
+
+    then:
+    output.process.exitValue() == 0
+    output.standardOut.contains 'Log marker defined: \'https://docs.docker.com/userguide/\'. Using this to scan logs for start indicator.'
+  }
+
+  private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
+    def stacktrace = printStacktrace ? ' --stacktrace' : ''
+    def cmd = "./gradlew clean check cleanup -i$stacktrace --project-dir src/test/gradle-projects/$project"
+
+    ProcessBuilder builder = new ProcessBuilder(cmd.split('\\s'))
+    Process process = builder.start()
+
+    // Capture the process output stream for later processing
+    def output = new StringBuffer()
+    def error = new StringBuffer()
+    process.consumeProcessOutput(output, error)
+
+    process.waitFor()
+    new GradleOutput(process, output.toString(), error.toString())
   }
 
   private static class GradleOutput {

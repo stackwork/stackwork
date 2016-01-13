@@ -57,9 +57,31 @@ class RunDockerComposeTask extends AbstractTask {
       String composeProject = createRandomString()
       project.stackwork.composeProject = composeProject
 
-      project.exec {
-        setCommandLine(['docker-compose', '-f', composeFile, '-p', composeProject,
-                        'up', '-d', *(this.longRunningServices)])
+      // start the compose project and monitor it's output
+      String[] command = ['docker-compose', '-f', composeFile, '-p', composeProject, 'up'] + this.longRunningServices
+
+      String marker = project.extensions.getByType(StackworkExtension).stackIsRunningWhenLogContains
+
+      if(marker) {
+        project.logger.info("Log marker defined: '$marker'. Using this to scan logs for start indicator.")
+      } else {
+        project.logger.info("No log marker defined, compose will be started 'fire and forget' style.")
+      }
+
+      project.logger.info('Starting Docker Compose.')
+
+      spawnProcessAndWaitFor command, { String line ->
+        project.logger.info line
+        if(marker == null || line == null) {
+          return true
+        }
+
+        if(line.contains(marker)){
+          project.logger.info "Found marker in compose logs. Stack started."
+          return true
+        }
+
+        return false
       }
     }
 
@@ -113,11 +135,31 @@ class RunDockerComposeTask extends AbstractTask {
     }
   }
 
-  String createRandomString() {
+  static String createRandomString() {
     def pool = ['A'..'Z', 0..9].flatten()
     Random rand = new Random(System.currentTimeMillis())
     def passChars = (0..8).collect { pool[rand.nextInt(pool.size())] }
     passChars.join()
+  }
+
+  /**
+   * Spawn an external process and monitor it's standard output for
+   */
+  static void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
+
+    ProcessBuilder builder = new ProcessBuilder(command)
+    builder.redirectErrorStream(true)
+    Process process = builder.start()
+
+    InputStream stdout = process.getInputStream()
+    BufferedReader reader = new BufferedReader(new InputStreamReader(stdout))
+
+    String line
+    while ((line = reader.readLine()) != null) {
+      if(logPredicate(line)) {
+        break;
+      }
+    }
   }
 
   boolean isExecutableImage(String serviceName) {

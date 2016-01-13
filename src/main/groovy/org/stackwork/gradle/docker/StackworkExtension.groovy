@@ -32,14 +32,17 @@ class StackworkExtension {
    */
   String imageName
 
+  /**
+   * Marker that Docker Compose logs are scanned for, when found this indicates the stack is running.
+   */
+  String stackIsRunningWhenLogContains
 
   private Project project
 
-    StackworkExtension(Project project) {
+  StackworkExtension(Project project) {
     this.project = project
     this.composeProject = this.project
   }
-
 
   @Override
   public String toString() {
@@ -49,6 +52,7 @@ class StackworkExtension {
             ", composeProject=" + composeProject +
             ", baseImageProject=" + baseImageProject +
             ", imageName='" + imageName + '\'' +
+            ", stackIsRunningWhenLogContains='" + stackIsRunningWhenLogContains + '\'' +
             ", project=" + project +
             '}';
   }

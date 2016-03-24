@@ -136,6 +136,15 @@ class DockerPluginSpecifications extends Specification {
     output.process.exitValue() == 0
   }
 
+
+	def "The root project can be a Docker Compose module, with a base docker compose stack version 2"() {
+		when:
+		GradleOutput output = runGradleTask('compose-root-project-version2')
+
+		then:
+		output.process.exitValue() == 0
+	}
+
   def "The root project can have a base docker compose stack that can be used by a compose module"() {
     when:
     GradleOutput output = runGradleTask('compose-root-project-compose-module')

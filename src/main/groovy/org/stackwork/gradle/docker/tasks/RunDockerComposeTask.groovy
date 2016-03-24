@@ -23,6 +23,10 @@ class RunDockerComposeTask extends AbstractTask {
     doLast {
       composeInfo = (Map<String, Object>) new Yaml().load(project.file(composeFile).text)
 
+	  if ("2"==composeInfo.get("version")) {
+	  	composeInfo = composeInfo.get("services")
+	  }
+
       List<String> allServices = new ArrayList<>()
       allServices.addAll(composeInfo.keySet())
 

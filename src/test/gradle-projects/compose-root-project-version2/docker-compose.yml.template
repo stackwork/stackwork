@@ -1,0 +1,8 @@
+# long-running services
+${project.stackwork.baseComposeStack}
+
+# executable images, will not start during the runDockerCompose task
+  testimage:
+    image: ${project.project(':testimage').stackwork.imageId}
+    links:
+    - service:server

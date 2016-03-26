@@ -1,2 +1,4 @@
-service:
-  image: hello-world
+version: '2'
+services:
+  service:
+    image: hello-world

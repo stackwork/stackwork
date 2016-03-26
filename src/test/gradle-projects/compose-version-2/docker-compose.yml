@@ -1,0 +1,9 @@
+version: '2'
+
+# currently the templating mechanism is naive - always end with the services and only define services in the
+# extending template files
+services:
+  service:
+    image: qkrijger/hello-world-wiremock-server:0.1.0-SNAPSHOT
+    ports:
+    - 80

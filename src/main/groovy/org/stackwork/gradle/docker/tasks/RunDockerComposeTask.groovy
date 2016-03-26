@@ -7,12 +7,12 @@ import org.stackwork.gradle.docker.StackworkExtension
 import org.yaml.snakeyaml.Yaml
 
 import static ModuleType.TEST_IMAGE
+import static java.lang.Integer.parseInt
 
 class RunDockerComposeTask extends AbstractTask {
 
   final static NAME = 'runDockerCompose'
 
-  Map<String, Object> composeInfo
   List<String> longRunningServices
   String composeFile = project.stackwork.composeFile
 
@@ -20,15 +20,29 @@ class RunDockerComposeTask extends AbstractTask {
     description = 'Runs the generated docker compose file.'
     group = 'Stackwork'
 
-    doLast {
-      composeInfo = (Map<String, Object>) new Yaml().load(project.file(composeFile).text)
+    int composeVersion
 
-	  if ("2"==composeInfo.get("version")) {
-	  	composeInfo = composeInfo.get("services")
-	  }
+    doLast {
+      Map<String, Object> composeInfo = (Map<String, Object>) new Yaml().load(project.file(composeFile).text)
+
+      composeVersion = composeInfo.containsKey('version') ? parseInt(composeInfo.version as String) : 1
+
+      Map<String, Object> composeServices
+      switch (composeVersion) {
+        case 1:
+          project.logger.info '{} uses Docker compose version 1', composeFile
+          composeServices = composeInfo
+          break
+        case 2:
+          project.logger.info '{} uses Docker compose version 2', composeFile
+          composeServices = composeInfo.services as Map<String, Object>
+          break
+        default:
+          throw new RuntimeException("Docker compose file '$composeFile' was not version 1 or 2 and is unsupported")
+      }
 
       List<String> allServices = new ArrayList<>()
-      allServices.addAll(composeInfo.keySet())
+      allServices.addAll(composeServices.keySet())
 
       List<List<String>> splitServices = allServices.split { this.isExecutableImage(it) }
       project.logger.info 'The following docker compose services were found to be executable: {}', splitServices[0]
@@ -80,7 +94,17 @@ class RunDockerComposeTask extends AbstractTask {
           } else {
             serviceInfo.port = exposedPort
             serviceInfo["port.${exposedPort}"] = exposedPort
-            serviceInfo.host = containerInfo.NetworkSettings.IPAddress
+            if (composeVersion == 1) {
+              serviceInfo.host = containerInfo.NetworkSettings.IPAddress
+            } else if (composeVersion == 2) {
+              Map<String, Object> networks = containerInfo.NetworkSettings.Networks
+              if (networks.size() != 1) {
+                throw new IllegalStateException("${networks.size()} networks found, only 1 supported!")
+              }
+              serviceInfo.host = networks.values().first().IPAddress
+            } else {
+              throw new IllegalStateException('Unsupported docker compose version')
+            }
           }
         }
         project.stackwork.services["$serviceName"] = serviceInfo

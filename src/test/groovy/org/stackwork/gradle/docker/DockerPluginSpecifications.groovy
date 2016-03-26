@@ -136,14 +136,13 @@ class DockerPluginSpecifications extends Specification {
     output.process.exitValue() == 0
   }
 
+  def "The root project can be a Docker Compose module, with a base docker compose stack version 2"() {
+    when:
+    GradleOutput output = runGradleTask('compose-version-2')
 
-	def "The root project can be a Docker Compose module, with a base docker compose stack version 2"() {
-		when:
-		GradleOutput output = runGradleTask('compose-root-project-version2')
-
-		then:
-		output.process.exitValue() == 0
-	}
+    then:
+    output.process.exitValue() == 0
+  }
 
   def "The root project can have a base docker compose stack that can be used by a compose module"() {
     when:
@@ -163,7 +162,8 @@ class DockerPluginSpecifications extends Specification {
   }
 
   private GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
-    def proc = "./gradlew clean check cleanup -i ${printStacktrace ? '--stacktrace' : ''} --project-dir src/test/gradle-projects/$project".execute()
+    def stacktrace = printStacktrace ? '--stacktrace' : ''
+    def proc = "./gradlew clean check cleanup -i $stacktrace --project-dir src/test/gradle-projects/$project".execute()
     OutputStream standardOut = new ByteArrayOutputStream()
     OutputStream standardErr = new ByteArrayOutputStream()
     proc.waitForProcessOutput(standardOut, standardErr)

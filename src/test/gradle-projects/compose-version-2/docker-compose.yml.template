@@ -1,7 +1,7 @@
-# long-running services
 ${project.stackwork.baseComposeStack}
 
-# executable images, will not start during the runDockerCompose task
+# base compose stack is version 2, zo we need indentation here ... TODO: improve this
+
   testimage:
     image: ${project.project(':testimage').stackwork.imageId}
     links:

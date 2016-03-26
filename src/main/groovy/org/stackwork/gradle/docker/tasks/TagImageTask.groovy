@@ -21,7 +21,7 @@ class TagImageTask extends Exec {
         throw new IllegalStateException('No docker image name defined. Cannot tag image. Please set "stackwork { imageName }".')
       }
     }
-    commandLine 'docker', 'tag', '-f', "${-> project.stackwork.imageId}", "${-> getImageName()}:${-> project.version}"
+    commandLine 'docker', 'tag', "${-> project.stackwork.imageId}", "${-> getImageName()}:${-> project.version}"
     doLast {
       project.stackwork.fullImageName = "${getImageName()}:${project.version}"
     }

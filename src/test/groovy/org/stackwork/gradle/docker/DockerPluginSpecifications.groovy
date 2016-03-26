@@ -166,14 +166,14 @@ class DockerPluginSpecifications extends Specification {
 
     then:
     output.process.exitValue() == 0
-    output.standardOut.contains 'Log marker defined: \'https://docs.docker.com/userguide/\'. Using this to scan logs for start indicator.'
+    output.standardOut.contains 'Found marker "https://docs.docker.com/userguide/" in compose logs. Stack started.'
   }
 
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
-    def stacktrace = printStacktrace ? ' --stacktrace' : ''
-    def cmd = "./gradlew clean check cleanup -i$stacktrace --project-dir src/test/gradle-projects/$project"
+    def stacktrace = printStacktrace ? '--stacktrace' : ''
+    def cmd = "./gradlew clean check cleanup -i ${stacktrace} --project-dir src/test/gradle-projects/$project"
 
-    ProcessBuilder builder = new ProcessBuilder(cmd.split('\\s'))
+    ProcessBuilder builder = new ProcessBuilder(cmd.split('(\\s)+'))
     Process process = builder.start()
 
     // Capture the process output stream for later processing
@@ -182,6 +182,12 @@ class DockerPluginSpecifications extends Specification {
     process.consumeProcessOutput(output, error)
 
     process.waitFor()
+    println '>>>>>>>>>>>>>  Standard Out  >>>>>>>>>>> ...'
+    println output.toString()
+    println '... <<<<<<<<<  Standard Out  <<<<<<<<<<<<<<<'
+    println '>>>>>>>>>>>>>  Standard Err  >>>>>>>>>>> ...'
+    println error.toString()
+    println '... <<<<<<<<<  Standard Err  <<<<<<<<<<<<<<<'
     new GradleOutput(process, output.toString(), error.toString())
   }
 

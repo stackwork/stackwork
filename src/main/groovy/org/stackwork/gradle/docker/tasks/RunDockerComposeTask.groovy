@@ -62,22 +62,27 @@ class RunDockerComposeTask extends AbstractTask {
 
       String marker = project.extensions.getByType(StackworkExtension).stackIsRunningWhenLogContains
 
-      if(marker) {
-        project.logger.info("Log marker defined: '$marker'. Using this to scan logs for start indicator.")
+      if (marker) {
+        project.logger.info 'Log marker defined: "{}". Using this to scan logs for start indicator.', marker
       } else {
-        project.logger.info("No log marker defined, compose will be started 'fire and forget' style.")
+        project.logger.info 'No log marker defined, compose will be started "fire and forget" style.'
       }
 
-      project.logger.info('Starting Docker Compose.')
+      project.logger.info 'Starting Docker Compose using command: {}', Arrays.toString(command)
 
       spawnProcessAndWaitFor command, { String line ->
         project.logger.info line
-        if(marker == null || line == null) {
-          return true
+        if (marker == null || line == null) {
+          boolean allServicesHaveStarted = true
+          longRunningServices.each { String serviceName ->
+            String containerId = this.askComposeServicesContainerId(serviceName)
+            if (containerId == null || containerId.empty) allServicesHaveStarted = false
+          }
+          return allServicesHaveStarted
         }
 
-        if(line.contains(marker)){
-          project.logger.info "Found marker in compose logs. Stack started."
+        if (line.contains(marker)) {
+          project.logger.info 'Found marker "{}" in compose logs. Stack started.', marker
           return true
         }
 
@@ -144,11 +149,13 @@ class RunDockerComposeTask extends AbstractTask {
 
   /**
    * Spawn an external process and monitor it's standard output for
+   *
+   * TODO: add configurable time-out functionality in case the predicate is never fulfilled
    */
   static void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
 
     ProcessBuilder builder = new ProcessBuilder(command)
-    builder.redirectErrorStream(true)
+    builder.redirectErrorStream true
     Process process = builder.start()
 
     InputStream stdout = process.getInputStream()
@@ -156,8 +163,8 @@ class RunDockerComposeTask extends AbstractTask {
 
     String line
     while ((line = reader.readLine()) != null) {
-      if(logPredicate(line)) {
-        break;
+      if (logPredicate(line)) {
+        break
       }
     }
   }

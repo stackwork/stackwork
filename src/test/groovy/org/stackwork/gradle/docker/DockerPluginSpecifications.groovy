@@ -62,7 +62,8 @@ class DockerPluginSpecifications extends Specification {
 
     then:
     output.process.exitValue() != 0
-    output.standardOut.contains 'The push refers to a repository [docker.io/library/my-image]'
+    output.standardOut.contains 'The push refers to a repository [docker.io/library/my-image]' ||
+    output.standardErr.contains 'You cannot push a "root" repository. Please rename your repository to <user>/<repo>'
   }
 
   def 'The runTestImage task runs the test image built in a test-image module against the docker compose setup'() {

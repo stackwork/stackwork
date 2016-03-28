@@ -1,5 +1,6 @@
 package org.stackwork.gradle.docker
 
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class DockerPluginSpecifications extends Specification {
@@ -160,13 +161,19 @@ class DockerPluginSpecifications extends Specification {
     output.standardOut.contains 'metadata-proving-we-extended-a-base-image'
   }
 
-  def "A compose project can define a log marker indicating the stack has started"() {
+  def "A COMPOSE project can define a log marker indicating the stack has started && stack logs can be used for testing"() {
     when:
     GradleOutput output = runGradleTask('compose-log-marker')
 
     then:
+    // logs from before the marker are sent to standard out
+    output.standardOut.contains 'This message shows that your installation appears to be working correctly.'
+    // the marker will be recognized
+    output.standardOut.contains 'Found marker "This message shows that your installation appears to be working correctly." in compose logs. Stack started.'
+    // standard output from the Stack from after the marker will not be sent to standard out
+    !output.standardOut.contains('https://docs.docker.com/userguide/')
+    // it will however be available in the logs to be used in your tests
     output.process.exitValue() == 0
-    output.standardOut.contains 'Found marker "https://docs.docker.com/userguide/" in compose logs. Stack started.'
   }
 
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {

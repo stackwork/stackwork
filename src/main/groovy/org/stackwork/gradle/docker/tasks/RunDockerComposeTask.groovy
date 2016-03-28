@@ -2,9 +2,13 @@ package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.internal.AbstractTask
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.stackwork.gradle.docker.ModuleType
 import org.stackwork.gradle.docker.StackworkExtension
 import org.yaml.snakeyaml.Yaml
+
+import java.nio.file.Paths
 
 import static ModuleType.TEST_IMAGE
 import static java.lang.Integer.parseInt
@@ -148,23 +152,34 @@ class RunDockerComposeTask extends AbstractTask {
   }
 
   /**
-   * Spawn an external process and monitor it's standard output for
+   * Spawn an external process and monitor it's standard and error output for a certain predicate
    *
    * TODO: add configurable time-out functionality in case the predicate is never fulfilled
    */
-  static void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
+  void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
 
-    ProcessBuilder builder = new ProcessBuilder(command)
-    builder.redirectErrorStream true
-    Process process = builder.start()
+    File logDir = project.file("${project.buildDir}/stackwork-plugin/logs")
+    logDir.mkdirs()
+    File logFile = new File(logDir, "docker-compose-${project.stackwork.composeProject}.log")
+    project.stackwork.composeLogFile = logFile
+    logFile.createNewFile()
+    Process compose = new ProcessBuilder(command).
+        redirectErrorStream(true).
+        redirectOutput(logFile).
+        start()
 
-    InputStream stdout = process.getInputStream()
-    BufferedReader reader = new BufferedReader(new InputStreamReader(stdout))
+    BufferedReader reader = new BufferedReader(new FileReader(logFile));
 
     String line
-    while ((line = reader.readLine()) != null) {
-      if (logPredicate(line)) {
-        break
+    while (reader.ready() || compose.alive) {
+      line = reader.readLine()
+      if (line) {
+        if (logPredicate(line)) {
+          break
+        }
+      } else {
+        // compose is still running, so we can expect new log lines later
+        Thread.sleep(100)
       }
     }
   }

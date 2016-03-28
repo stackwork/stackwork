@@ -13,6 +13,20 @@ apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
 
 stackwork {
   moduleType = COMPOSE
-  stackIsRunningWhenLogContains = "https://docs.docker.com/userguide/"
+  stackIsRunningWhenLogContains = 'This message shows that your installation appears to be working correctly.'
 }
 
+project.task('checkForLogLine') << {
+  File logFile = project.stackwork.composeLogFile
+  BufferedReader reader = new BufferedReader(new FileReader(logFile));
+  String line
+  while (line = reader.readLine()) {
+    if (line.contains('https://docs.docker.com/userguide/')) {
+      return
+    }
+  }
+  throw new RuntimeException('Test failed - no "https://docs.docker.com/userguide/" found in logs')
+}
+project.tasks.checkForLogLine.dependsOn project.tasks.stopDockerCompose
+project.tasks.cleanDockerCompose.dependsOn project.tasks.checkForLogLine
+project.tasks.stackworkCheck.dependsOn project.tasks.checkForLogLine

@@ -19,10 +19,13 @@ class RunDockerComposeTask extends AbstractTask {
 
   List<String> longRunningServices
   String composeFile = project.stackwork.composeFile
+  Process composeProcess
+  String composeProject = createRandomString()
 
   RunDockerComposeTask() {
     description = 'Runs the generated docker compose file.'
     group = 'Stackwork'
+    project.stackwork.composeProject = composeProject
 
     int composeVersion
 
@@ -58,9 +61,6 @@ class RunDockerComposeTask extends AbstractTask {
     }
 
     doLast {
-      String composeProject = createRandomString()
-      project.stackwork.composeProject = composeProject
-
       // start the compose project and monitor it's output
       String[] command = ['docker-compose', '-f', composeFile, '-p', composeProject, 'up'] + this.longRunningServices
 
@@ -167,19 +167,20 @@ class RunDockerComposeTask extends AbstractTask {
         redirectErrorStream(true).
         redirectOutput(logFile).
         start()
+    this.composeProcess = compose
 
-    BufferedReader reader = new BufferedReader(new FileReader(logFile));
-
-    String line
-    while (reader.ready() || compose.alive) {
-      line = reader.readLine()
-      if (line) {
-        if (logPredicate(line)) {
-          break
+    logFile.withReader { reader ->
+      String line
+      while (reader.ready() || compose.alive) {
+        line = reader.readLine()
+        if (line) {
+          if (logPredicate(line)) {
+            break
+          }
+        } else {
+          // compose is still running, so we can expect new log lines later
+          Thread.sleep(100)
         }
-      } else {
-        // compose is still running, so we can expect new log lines later
-        Thread.sleep(100)
       }
     }
   }

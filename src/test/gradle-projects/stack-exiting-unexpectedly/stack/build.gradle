@@ -1,0 +1,22 @@
+import static org.stackwork.gradle.docker.ModuleType.*
+
+apply plugin: 'stackwork'
+
+stackwork {
+  moduleType = COMPOSE
+  stackIsRunningWhenLogContains = 'The stack has started but will fail in a moment'
+}
+
+project.task('checkForLogLineThatOccursAfterStackWasFoundToBeStarted') << {
+  File logFile = project.project(':stack').stackwork.composeLogFile
+  BufferedReader reader = new BufferedReader(new FileReader(logFile));
+  String line
+  while (line = reader.readLine()) {
+    if (line.contains('Now fail the stack with exit 1')) {
+      return
+    }
+  }
+  throw new RuntimeException('Test failed - no "Now fail the stack with exit 1" found in logs')
+}
+project.tasks.checkForLogLineThatOccursAfterStackWasFoundToBeStarted.dependsOn project.tasks.stopDockerCompose
+project.tasks.stackworkCheck.dependsOn project.tasks.checkForLogLineThatOccursAfterStackWasFoundToBeStarted

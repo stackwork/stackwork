@@ -166,15 +166,27 @@ class DockerPluginSpecification extends Specification {
     when:
     GradleOutput output = runGradleTask('compose-log-marker')
 
-    then:
-    // logs from before the marker are sent to standard out
+    then: 'logs from before the marker are sent to standard out'
     output.standardOut.contains 'This message shows that your installation appears to be working correctly.'
-    // the marker will be recognized
-    output.standardOut.contains 'Found marker "This message shows that your installation appears to be working correctly." in compose logs. Stack started.'
-    // standard output from the Stack from after the marker will not be sent to standard out
+    and: 'the marker will be recognized'
+    output.standardOut.contains('Found marker "This message shows that your installation appears to be working ' +
+        'correctly." in compose logs. Stack started.')
+    and: 'standard output from the Stack from after the marker will not be sent to standard out'
     !output.standardOut.contains('https://docs.docker.com/userguide/')
-    // it will however be available in the logs to be used in your tests
+    and: 'it will however be available in the logs to be used in your tests'
     output.process.exitValue() == 0
+  }
+
+  def "A stack that exits with non-zero exit code fails the build"() {
+    when:
+    GradleOutput output = runGradleTask('stack-exiting-unexpectedly')
+
+    then:
+    output.standardOut.contains 'Found marker "The stack has started but will fail in a moment" in compose logs. ' +
+        'Stack started.'
+    output.standardErr.contains("The docker compose process in project 'stack' will be shut down. However, '1' " +
+        "container(s) exited with a non-zero exit code, so we're failing the build.")
+    output.process.exitValue() != 0
   }
 
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {

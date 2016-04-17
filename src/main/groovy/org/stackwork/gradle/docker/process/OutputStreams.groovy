@@ -8,44 +8,49 @@ class OutputStreams extends OutputStream {
   private final List<OutputStream> outputStreams;
 
   public OutputStreams(List<OutputStream> outputStreams) {
-    for (OutputStream outputStream : outputStreams) {
-      if (out == null)
-        throw new NullPointerException();
+    outputStreams.each {
+      if (it == null) {
+        String msg = 'Attempting to initialize OutputStreams with one or more null outputStreams'
+        log.severe msg
+        throw new IllegalArgumentException(msg)
+      }
     }
-    else if (tee == null)
-      throw new NullPointerException();
 
-    this.out = out;
-    this.tee = tee;
+    this.outputStreams = outputStreams
   }
 
   @Override
   public void write(int b) throws IOException {
-    out.write(b);
-    tee.write(b);
+    outputStreams.each {
+      it.write b
+    }
   }
 
   @Override
   public void write(byte[] b) throws IOException {
-    out.write(b);
-    tee.write(b);
+    outputStreams.each {
+      it.write b
+    }
   }
 
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
-    out.write(b, off, len);
-    tee.write(b, off, len);
+    outputStreams.each {
+      it.write b, off, len
+    }
   }
 
   @Override
   public void flush() throws IOException {
-    out.flush();
-    tee.flush();
+    outputStreams.each {
+      it.flush()
+    }
   }
 
   @Override
   public void close() throws IOException {
-    out.close();
-    tee.close();
+    outputStreams.each {
+      it.close();
+    }
   }
 }

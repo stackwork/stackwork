@@ -18,8 +18,10 @@ class DockerPluginSpecification extends Specification {
     when:
     GradleOutput output = runGradleTask('build')
 
-    then:
+    then: 'the build is successful'
     output.process.exitValue() == 0
+    and: 'the Docker build output is written to stdOut on gradle -i'
+    output.standardOut.contains 'Step 2 : COPY Dockerfile /'
   }
 
   def "A test module that applies the JavaPlugin is allowed to connect to an image in unit tests trough appropriately set system properties"() {

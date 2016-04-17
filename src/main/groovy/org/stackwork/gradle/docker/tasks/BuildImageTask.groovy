@@ -1,6 +1,7 @@
 package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.tasks.Exec
+import org.stackwork.gradle.docker.process.OutputStreams
 
 class BuildImageTask extends Exec {
 
@@ -14,7 +15,7 @@ class BuildImageTask extends Exec {
     commandLine 'docker', 'build', '--file', "${->project.stackwork.dockerFile}", project.projectDir
 
     def buffer = new ByteArrayOutputStream()
-    setStandardOutput buffer
+    standardOutput = new OutputStreams([standardOutput, buffer])
 
     doLast {
       def output = buffer.toString('UTF-8')

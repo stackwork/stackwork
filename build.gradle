@@ -7,6 +7,7 @@ buildscript {
 plugins {
   id 'groovy'
   id 'maven'
+  id 'java-gradle-plugin'
 
   id 'nebula.info' version '2.2.4'
   id 'nebula.contacts' version '2.2.0'
@@ -46,7 +47,6 @@ repositories {
 }
 
 dependencies {
-  compile gradleApi()
   compile localGroovy()
   compile group: 'org.yaml', name: 'snakeyaml', version: '1.16'
 

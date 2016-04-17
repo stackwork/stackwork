@@ -1,9 +1,8 @@
 package org.stackwork.gradle.docker
 
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
-class DockerPluginSpecifications extends Specification {
+class DockerPluginSpecification extends Specification {
 
   static final boolean NO_STACKTRACE = false
 

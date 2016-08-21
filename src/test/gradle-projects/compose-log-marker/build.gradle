@@ -21,11 +21,12 @@ project.task('checkForLogLine') << {
   BufferedReader reader = new BufferedReader(new FileReader(logFile));
   String line
   while (line = reader.readLine()) {
-    if (line.contains('https://docs.docker.com/userguide/')) {
+    if (line.contains('This message shows that your installation appears to be working correctly.')) {
       return
     }
   }
-  throw new RuntimeException('Test failed - no "https://docs.docker.com/userguide/" found in logs')
+  throw new RuntimeException('Test failed - no "This message shows that your installation appears to be working ' +
+          'correctly." found in logs')
 }
 project.tasks.checkForLogLine.dependsOn project.tasks.stopDockerCompose
 project.tasks.cleanDockerCompose.dependsOn project.tasks.checkForLogLine

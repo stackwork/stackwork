@@ -1,0 +1,9 @@
+service:
+  image: ${stackwork.imageId}
+  expose: 22
+  command: ['/etc/init.d/sshd', 'start']
+
+builder:
+  image: ${project.project(':builder').stackwork.imageId}
+  links:
+    - service:service

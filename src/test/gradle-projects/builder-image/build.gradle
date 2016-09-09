@@ -1,0 +1,30 @@
+import static org.stackwork.gradle.docker.ModuleType.*
+
+buildscript {
+  repositories {
+    maven { url = "file://${project.projectDir}/../../../../build/repoForTests" }
+    mavenCentral()
+  }
+  dependencies {
+    classpath group: 'org.stackwork.gradle', name: 'stackwork', version: '0.1-TEST'
+  }
+}
+apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
+
+stackwork {
+  moduleType = IMAGE
+  builderImageProject = project.project ':builder'
+}
+
+task('runImage',
+    description: 'Run the image. It should print "added via ssh by a builder image". This fails if that has not ' +
+        'happened, because in that case the command "cat /message" cannot find the file /message',
+    group: 'Stackwork',
+    type: Exec) {
+  commandLine 'docker', 'run', "${-> project.stackwork.imageId}"
+}
+
+tasks.runImage.dependsOn tasks.buildImage
+afterEvaluate {
+  tasks.stackworkCheck.dependsOn tasks.runImage
+}

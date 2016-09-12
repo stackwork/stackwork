@@ -24,7 +24,7 @@ class StopDockerComposeTask extends AbstractTask {
         // count the number of containers already exited with a non-zero exit code. Running container are seen by
         // docker inspect to have ExitCode = 0
         String commandToSeeIfAnyContainersOfTheStackFailed =
-            "docker-compose -f ${runDockerComposeTask.composeFile} -p ${runDockerComposeTask.composeProject} ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v 0 | wc -l | tr -d ' '"
+            "docker-compose -f \"${runDockerComposeTask.composeFile}\" -p \"${runDockerComposeTask.composeProject}\" ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v 0 | wc -l | tr -d ' '"
         commandLine('bash', '-c', commandToSeeIfAnyContainersOfTheStackFailed)
         standardOutput = out
       }

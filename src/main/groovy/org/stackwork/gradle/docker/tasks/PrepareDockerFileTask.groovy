@@ -16,7 +16,7 @@ class PrepareDockerFileTask extends AbstractTask {
 
     dependsOn project.task("parseDockerFileTemplate", type: Copy) {
       // disable task caching
-      onlyIf { dependsOnBaseImage() }
+      onlyIf { usingDockerfileTemplate() }
       outputs.upToDateWhen { false }
       description = 'Parsing the Dockerfile.template'
 
@@ -28,15 +28,14 @@ class PrepareDockerFileTask extends AbstractTask {
     }
 
     doLast {
-      project.stackwork.dockerFile = dependsOnBaseImage() ?
+      project.stackwork.dockerFile = usingDockerfileTemplate() ?
               project.file("${project.stackwork.buildDir}/Dockerfile").absolutePath :
               project.file('Dockerfile').absolutePath
     }
   }
 
-  boolean dependsOnBaseImage() {
-    def baseImageProject = getBaseImageProject()
-    baseImageProject != null && baseImageProject != project
+  boolean usingDockerfileTemplate() {
+    project.file('Dockerfile.template').exists()
   }
 
   Project getBaseImageProject() {

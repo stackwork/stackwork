@@ -1,5 +1,6 @@
 package org.stackwork.gradle.docker
 
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class DockerPluginSpecification extends Specification {
@@ -22,6 +23,14 @@ class DockerPluginSpecification extends Specification {
     output.process.exitValue() == 0
     and: 'the Docker build output is written to stdOut on gradle -i'
     output.standardOut.contains 'Step 2 : COPY Dockerfile /'
+  }
+
+  def "The Dockerfile may be templated using project properties"() {
+    when:
+    GradleOutput output = runGradleTask('build-templated-dockerfile')
+
+    then: 'the build is successful'
+    output.process.exitValue() == 0
   }
 
   def "A test module that applies the JavaPlugin is allowed to connect to an image in unit tests trough appropriately set system properties"() {

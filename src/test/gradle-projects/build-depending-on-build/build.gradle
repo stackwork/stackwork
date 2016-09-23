@@ -10,7 +10,3 @@ buildscript {
   }
 }
 apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
-
-stackwork {
-  moduleType = IMAGE
-}

@@ -22,6 +22,7 @@ import static ModuleType.*
 class StackworkPlugin implements Plugin<Project> {
 
   private static final boolean RECURSIVE = true
+  private static final boolean NOT_RECURSIVE = false
   private Project project
 
   private Task stackworkTest
@@ -173,7 +174,7 @@ class StackworkPlugin implements Plugin<Project> {
   private void coupleGenerateDockerfileToBuildOfBaseImage() {
     def baseImageProject = getBaseImageProject()
     if (baseImageProject) {
-      prepareDockerFile.dependsOn baseImageProject.tasks["${BuildImageTask.NAME}"]
+      prepareDockerFile.dependsOn baseImageProject.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
     }
   }
 

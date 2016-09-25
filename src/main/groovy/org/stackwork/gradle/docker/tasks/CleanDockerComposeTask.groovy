@@ -18,7 +18,8 @@ class CleanDockerComposeTask extends Exec {
       project.extensions.getByType(StackworkExtension).stopContainers
     }
 
-    commandLine 'docker-compose', '-f', "${-> stackwork.composeFile}", '-p', "${-> stackwork.composeProject}", 'down'
+    commandLine 'docker-compose', '-f', "${-> stackwork.composeFile}",
+        '-p', "${-> stackwork.dockerComposeRunner.projectId}", 'down'
   }
 
 }

@@ -1,6 +1,7 @@
 package org.stackwork.gradle.docker
 
 import org.gradle.api.Project
+import org.stackwork.gradle.docker.tasks.DockerComposeRunner
 
 class StackworkObject {
 
@@ -33,10 +34,12 @@ class StackworkObject {
    */
   File composeLogFile
   String containerId
+  DockerComposeRunner dockerComposeRunner
 
   StackworkObject(Project project) {
     this.project = project
     buildDir = "${project.buildDir}/stackwork-plugin"
+    dockerComposeRunner = new DockerComposeRunner(project)
   }
 
 }

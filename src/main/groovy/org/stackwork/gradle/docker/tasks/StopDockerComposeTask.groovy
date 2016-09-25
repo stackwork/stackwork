@@ -35,7 +35,8 @@ class StopDockerComposeTask extends AbstractTask {
       int nrOfNonZeroExitCodes = out.toString() as Integer
 
       project.exec {
-        commandLine 'docker-compose', '-f', "${->stackwork.composeFile}", '-p', "${->stackwork.composeProject}", 'stop'
+        commandLine 'docker-compose', '-f', "${->stackwork.composeFile}",
+            '-p', "${->stackwork.dockerComposeRunner.projectId}", 'stop'
       }
 
       logger.info "Stack will be exited. '$nrOfNonZeroExitCodes' container(s) already have a non-zero exit code."

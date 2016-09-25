@@ -19,12 +19,11 @@ class RunDockerComposeTask extends AbstractTask {
   @Internal List<String> longRunningServices
   @Internal String composeFile = stackwork.composeFile
   @Internal Process composeProcess
-  @Internal String composeProject = createRandomString()
+  @Internal String composeProject = stackwork.dockerComposeRunner.projectId
 
   RunDockerComposeTask() {
     description = 'Runs the generated docker compose file.'
     group = 'Stackwork'
-    stackwork.composeProject = composeProject
 
     int composeVersion
 
@@ -159,7 +158,7 @@ class RunDockerComposeTask extends AbstractTask {
 
     File logDir = project.file("${stackwork.buildDir}/logs")
     logDir.mkdirs()
-    File logFile = new File(logDir, "docker-compose-${stackwork.composeProject}.log")
+    File logFile = new File(logDir, "docker-compose-${stackwork.dockerComposeRunner.projectId}.log")
     stackwork.composeLogFile = logFile
     logFile.createNewFile()
     Process compose = new ProcessBuilder(command).
@@ -197,7 +196,7 @@ class RunDockerComposeTask extends AbstractTask {
   String askComposeServicesContainerId(String serviceName) {
     OutputStream os = new ByteArrayOutputStream()
     project.exec {
-      setCommandLine(['docker-compose', '-f', this.composeFile, '-p', stackwork.composeProject,
+      setCommandLine(['docker-compose', '-f', this.composeFile, '-p', stackwork.dockerComposeRunner.projectId,
                       'ps', '-q', serviceName])
       setStandardOutput(os)
     }

@@ -8,6 +8,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.stackwork.gradle.docker.tasks.BuildImageTask
 import org.stackwork.gradle.docker.tasks.CleanDockerComposeTask
 import org.stackwork.gradle.docker.tasks.CollectImageDependenciesTask
+import org.stackwork.gradle.docker.tasks.DockerComposeRunner
 import org.stackwork.gradle.docker.tasks.GenerateDockerComposeFileTask
 import org.stackwork.gradle.docker.tasks.HookTaskNames
 import org.stackwork.gradle.docker.tasks.PrepareDockerFileTask
@@ -150,13 +151,6 @@ class StackworkPlugin implements Plugin<Project> {
   }
 
   private void filterInternalTasksToRun() {
-    Closure<Boolean> shouldRunDockerCompose = {
-      def dependsOnComposeProject = project != getComposeProject()
-      isModuleType(COMPOSE) ||
-      (isModuleType(TEST_IMAGE) && !dependsOnComposeProject) ||
-      (isModuleType(TEST) && !dependsOnComposeProject)
-    }
-
     Closure<Boolean> shouldBuildImage = {
       isModuleType(DELIVERABLE_IMAGE) || isModuleType(TEST_IMAGE) || isModuleType(IMAGE)
     }
@@ -165,11 +159,18 @@ class StackworkPlugin implements Plugin<Project> {
     buildImage.onlyIf shouldBuildImage
     tagImage.onlyIf { isModuleType(DELIVERABLE_IMAGE) }
     pushImage.onlyIf { isModuleType(DELIVERABLE_IMAGE) }
-    generateComposeFile.onlyIf shouldRunDockerCompose
-    runCompose.onlyIf shouldRunDockerCompose
-    stopCompose.onlyIf shouldRunDockerCompose
-    cleanCompose.onlyIf shouldRunDockerCompose
+    generateComposeFile.onlyIf { isComposeEnabledProject() }
+    runCompose.onlyIf { isComposeEnabledProject() }
+    stopCompose.onlyIf { isComposeEnabledProject() }
+    cleanCompose.onlyIf { isComposeEnabledProject() }
     runTestImage.onlyIf { isModuleType(TEST_IMAGE) }
+  }
+
+  protected boolean isComposeEnabledProject() {
+    def dependsOnComposeProject = project != getComposeProject()
+    isModuleType(COMPOSE) ||
+        (isModuleType(TEST_IMAGE) && !dependsOnComposeProject) ||
+        (isModuleType(TEST) && !dependsOnComposeProject)
   }
 
   private void coupleGenerateDockerfileToBuildOfBaseImage() {

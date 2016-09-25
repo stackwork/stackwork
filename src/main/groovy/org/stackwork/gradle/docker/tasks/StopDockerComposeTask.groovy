@@ -2,11 +2,14 @@ package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.GradleException
 import org.gradle.api.internal.AbstractTask
+import org.gradle.api.tasks.Internal
 import org.stackwork.gradle.docker.StackworkExtension
+import org.stackwork.gradle.docker.StackworkObject
 
 class StopDockerComposeTask extends AbstractTask {
 
   final static NAME = 'stopDockerCompose'
+  @Internal final StackworkObject stackwork = project.stackwork
 
   StopDockerComposeTask() {
 
@@ -32,8 +35,7 @@ class StopDockerComposeTask extends AbstractTask {
       int nrOfNonZeroExitCodes = out.toString() as Integer
 
       project.exec {
-        commandLine 'docker-compose', '-f', "${->project.stackwork.composeFile}",
-            '-p', "${->project.stackwork.composeProject}", 'stop'
+        commandLine 'docker-compose', '-f', "${->stackwork.composeFile}", '-p', "${->stackwork.composeProject}", 'stop'
       }
 
       logger.info "Stack will be exited. '$nrOfNonZeroExitCodes' container(s) already have a non-zero exit code."

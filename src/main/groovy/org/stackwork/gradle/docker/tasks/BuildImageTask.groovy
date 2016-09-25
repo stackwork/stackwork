@@ -1,18 +1,21 @@
 package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.Internal
+import org.stackwork.gradle.docker.StackworkObject
 import org.stackwork.gradle.docker.process.OutputStreams
 
 class BuildImageTask extends Exec {
 
   final static NAME = 'buildImage'
+  @Internal final StackworkObject stackwork = project.stackwork
 
   BuildImageTask() {
 
     description = 'Builds the Dockerfile in your project root folder.'
     group = 'Stackwork'
 
-    commandLine 'docker', 'build', '--file', "${->project.stackwork.dockerFile}", project.projectDir
+    commandLine 'docker', 'build', '--file', "${-> stackwork.dockerFile}", project.projectDir
 
     def buffer = new ByteArrayOutputStream()
     standardOutput = new OutputStreams([standardOutput, buffer])
@@ -28,7 +31,7 @@ class BuildImageTask extends Exec {
       def imageId = imageIdMatcher.group('imageId')
 
       logger.info 'Docker image id: {}', imageId
-      project.ext.stackwork.imageId = imageId
+      stackwork.imageId = imageId
     }
   }
 }

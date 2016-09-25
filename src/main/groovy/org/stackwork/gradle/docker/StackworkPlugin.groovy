@@ -40,18 +40,17 @@ class StackworkPlugin implements Plugin<Project> {
   private Task runTestImage
   private Task generateComposeFile
 
+  private StackworkObject stackworkObject
+
   @Override
   void apply(Project project) {
     this.project = project
 
-    project.ext.stackwork = [:]
-    project.stackwork.services = [:]
-    project.stackwork.modules = [:]
-    project.stackwork.buildDir = "${project.buildDir}/stackwork-plugin"
+    project.extensions.create('stackwork', StackworkExtension, project)
+    stackworkObject = new StackworkObject(project)
+    project.ext.stackwork = stackworkObject
 
     evaluateEnvironment()
-
-    project.extensions.create('stackwork', StackworkExtension, project)
 
     project.configurations {
       stackwork {
@@ -73,7 +72,8 @@ class StackworkPlugin implements Plugin<Project> {
     }
 
     project.gradle.projectsEvaluated {
-      getComposeProject().stackwork.modules["${project.name}"] = getModuleType()
+      StackworkObject stackworkOfComposeProject = getComposeProject().stackwork
+      stackworkOfComposeProject.modules["${project.name}"] = getModuleType()
       coupleComposeTasksToRelatedModulesBuildTasks()
       coupleGenerateDockerfileToBuildOfBaseImage()
     }
@@ -85,7 +85,7 @@ class StackworkPlugin implements Plugin<Project> {
       // in case of remote connection to docker daemon
       project.logger.info("DOCKER_HOST system variable with value '$dockerHost' found. Will expose docker " +
               "container forwarded ports and the DOCKER_HOST to the test classes.")
-      project.stackwork.host = new URI(dockerHost).host
+      stackworkObject.host = new URI(dockerHost).host
     } else {
       // in case of local docker daemon
       project.logger.info('No DOCKER_HOST system variable found. Will expose docker container ips and exposed ports' +
@@ -188,7 +188,7 @@ class StackworkPlugin implements Plugin<Project> {
   private void loadBaseComposeStackIfItExists() {
     def file = project.file('docker-compose.yml', PathValidation.NONE)
     if (file.exists()) {
-      project.stackwork.baseComposeStack = file.getText('UTF-8')
+      stackworkObject.baseComposeStack = file.getText('UTF-8')
     }
   }
 

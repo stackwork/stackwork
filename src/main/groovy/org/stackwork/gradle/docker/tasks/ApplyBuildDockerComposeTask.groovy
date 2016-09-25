@@ -1,11 +1,14 @@
 package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.stackwork.gradle.docker.StackworkObject
 
 class ApplyBuildDockerComposeTask extends DefaultTask {
 
   final static NAME = 'applyBuildDockerCompose'
+  @Internal final StackworkObject stackwork = project.stackwork
 
   ApplyBuildDockerComposeTask() {
     group = 'Stackwork'
@@ -30,12 +33,12 @@ class ApplyBuildDockerComposeTask extends DefaultTask {
     String buildComposeFilename = 'build.docker-compose.yml'
     project.copy {
       from project.projectDir
-      into project.stackwork.buildDir
+      into stackwork.buildDir
       include 'build.docker-compose.yml.template'
       rename { file -> buildComposeFilename }
       expand(project.properties)
     }
-    project.file "${project.stackwork.buildDir}/${buildComposeFilename}"
+    project.file "${stackwork.buildDir}/${buildComposeFilename}"
   }
 
 }

@@ -1,10 +1,13 @@
 package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Internal
+import org.stackwork.gradle.docker.StackworkObject
 
 class PrepareDockerFileTask extends Copy {
 
   final static NAME = 'prepareDockerFile'
+  @Internal final StackworkObject stackwork = project.stackwork
 
   PrepareDockerFileTask() {
     group = 'Stackwork'
@@ -14,16 +17,16 @@ class PrepareDockerFileTask extends Copy {
     description = 'Parsing the Dockerfile.template'
 
     from project.projectDir
-    into project.stackwork.buildDir
+    into stackwork.buildDir
     include 'Dockerfile.template'
     rename { file -> 'Dockerfile' }
     expand project.properties
 
-    project.stackwork.dockerFile = project.file('Dockerfile').absolutePath
+    stackwork.dockerFile = project.file('Dockerfile').absolutePath
 
     doLast {
       if (usingDockerfileTemplate()) {
-        project.stackwork.dockerFile = project.file("${project.stackwork.buildDir}/Dockerfile").absolutePath
+        stackwork.dockerFile = project.file("${stackwork.buildDir}/Dockerfile").absolutePath
       }
     }
   }

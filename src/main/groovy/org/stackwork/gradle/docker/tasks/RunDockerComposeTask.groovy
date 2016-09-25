@@ -2,13 +2,11 @@ package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.internal.AbstractTask
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.gradle.api.tasks.Internal
 import org.stackwork.gradle.docker.ModuleType
 import org.stackwork.gradle.docker.StackworkExtension
+import org.stackwork.gradle.docker.StackworkObject
 import org.yaml.snakeyaml.Yaml
-
-import java.nio.file.Paths
 
 import static ModuleType.TEST_IMAGE
 import static java.lang.Integer.parseInt
@@ -16,16 +14,17 @@ import static java.lang.Integer.parseInt
 class RunDockerComposeTask extends AbstractTask {
 
   final static NAME = 'runDockerCompose'
+  @Internal final StackworkObject stackwork = project.stackwork
 
-  List<String> longRunningServices
-  String composeFile = project.stackwork.composeFile
-  Process composeProcess
-  String composeProject = createRandomString()
+  @Internal List<String> longRunningServices
+  @Internal String composeFile = stackwork.composeFile
+  @Internal Process composeProcess
+  @Internal String composeProject = createRandomString()
 
   RunDockerComposeTask() {
     description = 'Runs the generated docker compose file.'
     group = 'Stackwork'
-    project.stackwork.composeProject = composeProject
+    stackwork.composeProject = composeProject
 
     int composeVersion
 
@@ -106,7 +105,7 @@ class RunDockerComposeTask extends AbstractTask {
         containerInfo.NetworkSettings.Ports.each { String exposedPortProto, forwardedPorts ->
           int exposedPort = (exposedPortProto =~ /\d+/)[0] as int
 
-          if (project.stackwork.host) {
+          if (stackwork.host) {
             if (!forwardedPorts) {
               project.logger.warn("No port forwarding defined for service '$serviceName'. " +
                       "No port configuration will be exposed.")
@@ -121,7 +120,7 @@ class RunDockerComposeTask extends AbstractTask {
               }
               serviceInfo.port = forwardedPorts.first().HostPort
             }
-            serviceInfo.host = project.stackwork.host
+            serviceInfo.host = stackwork.host
           } else {
             serviceInfo.port = exposedPort
             serviceInfo["port.${exposedPort}"] = exposedPort
@@ -138,8 +137,8 @@ class RunDockerComposeTask extends AbstractTask {
             }
           }
         }
-        project.stackwork.services["$serviceName"] = serviceInfo
-        println "Setting stackwork.services.$serviceName: $serviceInfo"
+        stackwork.services["$serviceName"] = serviceInfo
+        project.logger.info "Setting stackwork.services.$serviceName: $serviceInfo"
       }
     }
   }
@@ -158,10 +157,10 @@ class RunDockerComposeTask extends AbstractTask {
    */
   void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
 
-    File logDir = project.file("${project.buildDir}/stackwork-plugin/logs")
+    File logDir = project.file("${stackwork.buildDir}/logs")
     logDir.mkdirs()
-    File logFile = new File(logDir, "docker-compose-${project.stackwork.composeProject}.log")
-    project.stackwork.composeLogFile = logFile
+    File logFile = new File(logDir, "docker-compose-${stackwork.composeProject}.log")
+    stackwork.composeLogFile = logFile
     logFile.createNewFile()
     Process compose = new ProcessBuilder(command).
         redirectErrorStream(true).
@@ -187,17 +186,18 @@ class RunDockerComposeTask extends AbstractTask {
 
   boolean isExecutableImage(String serviceName) {
     Project composeProject = project.extensions.getByType(StackworkExtension).composeProject
-    boolean serviceImageIsBuiltInModule = composeProject.stackwork.modules["$serviceName"]
+    StackworkObject composeProjectStackwork = composeProject.stackwork
+    boolean serviceImageIsBuiltInModule = composeProjectStackwork.modules["$serviceName"]
     if (!serviceImageIsBuiltInModule) return false
 
-    ModuleType moduleType = composeProject.stackwork.modules["$serviceName"]
+    ModuleType moduleType = composeProjectStackwork.modules["$serviceName"]
     moduleType == TEST_IMAGE
   }
 
   String askComposeServicesContainerId(String serviceName) {
     OutputStream os = new ByteArrayOutputStream()
     project.exec {
-      setCommandLine(['docker-compose', '-f', this.composeFile, '-p', project.stackwork.composeProject,
+      setCommandLine(['docker-compose', '-f', this.composeFile, '-p', stackwork.composeProject,
                       'ps', '-q', serviceName])
       setStandardOutput(os)
     }

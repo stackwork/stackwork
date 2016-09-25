@@ -2,11 +2,14 @@ package org.stackwork.gradle.docker.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.Internal
 import org.stackwork.gradle.docker.StackworkExtension
+import org.stackwork.gradle.docker.StackworkObject
 
 class PushImageTask extends Exec {
 
   final static NAME = 'pushImage'
+  @Internal final StackworkObject stackwork = project.stackwork
 
   PushImageTask() {
 
@@ -21,7 +24,7 @@ class PushImageTask extends Exec {
         throw new IllegalStateException('No docker image name defined. Cannot tag image. Please set "stackwork { imageName }".')
       }
     }
-    commandLine 'docker', 'push', "${-> project.stackwork.fullImageName}"
+    commandLine 'docker', 'push', "${-> stackwork.fullImageName}"
   }
 
 }

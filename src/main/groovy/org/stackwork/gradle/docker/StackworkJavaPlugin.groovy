@@ -13,7 +13,8 @@ class StackworkJavaPlugin implements Plugin<Project> {
 
     project.tasks.test.doFirst {
       project.logger.info 'Loading docker service information into the JVM as system properties'
-      getComposeProject().stackwork.services.each { serviceName, serviceInfo ->
+      StackworkObject stackwork = getComposeProject().stackwork
+      stackwork.services.each { serviceName, serviceInfo ->
         serviceInfo.each { infoKey, infoVal ->
           def systemEnvKey = "stackwork.$serviceName.$infoKey"
           project.logger.debug 'Loading {} with value {}', systemEnvKey, infoVal

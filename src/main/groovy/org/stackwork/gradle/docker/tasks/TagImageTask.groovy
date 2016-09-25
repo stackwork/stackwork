@@ -4,11 +4,14 @@ import org.gradle.api.Project
 import org.gradle.api.internal.TaskInternal
 import org.gradle.api.internal.tasks.execution.TaskValidator
 import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.Internal
 import org.stackwork.gradle.docker.StackworkExtension
+import org.stackwork.gradle.docker.StackworkObject
 
 class TagImageTask extends Exec {
 
   final static NAME = 'tagImage'
+  @Internal final StackworkObject stackwork = project.stackwork
 
   TagImageTask() {
 
@@ -26,12 +29,13 @@ class TagImageTask extends Exec {
       }
     })
 
-    commandLine 'docker', 'tag', "${-> project.stackwork.imageId}", "${-> getImageName()}:${-> project.version}"
+    commandLine 'docker', 'tag', "${-> stackwork.imageId}", "${-> getImageName()}:${-> project.version}"
     doLast {
-      project.stackwork.fullImageName = "${getImageName()}:${project.version}"
+      stackwork.fullImageName = "${getImageName()}:${project.version}"
     }
   }
 
+  @Internal
   String getImageName() {
     project.extensions.getByType(StackworkExtension).imageName
   }

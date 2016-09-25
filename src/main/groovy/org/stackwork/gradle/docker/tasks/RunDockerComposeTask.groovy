@@ -1,15 +1,10 @@
 package org.stackwork.gradle.docker.tasks
 
-import org.gradle.api.Project
 import org.gradle.api.internal.AbstractTask
 import org.gradle.api.tasks.Internal
-import org.stackwork.gradle.docker.ModuleType
 import org.stackwork.gradle.docker.StackworkExtension
 import org.stackwork.gradle.docker.StackworkObject
 import org.yaml.snakeyaml.Yaml
-
-import static ModuleType.TEST_IMAGE
-import static java.lang.Integer.parseInt
 
 class RunDockerComposeTask extends AbstractTask {
 
@@ -28,34 +23,9 @@ class RunDockerComposeTask extends AbstractTask {
     int composeVersion
 
     doLast {
-      Map<String, Object> composeInfo = (Map<String, Object>) new Yaml().load(project.file(composeFile).text)
-
-      composeVersion = composeInfo.containsKey('version') ? parseInt(composeInfo.version as String) : 1
-
-      Map<String, Object> composeServices
-      switch (composeVersion) {
-        case 1:
-          project.logger.info '{} uses Docker compose version 1', composeFile
-          composeServices = composeInfo
-          break
-        case 2:
-          project.logger.info '{} uses Docker compose version 2', composeFile
-          composeServices = composeInfo.services as Map<String, Object>
-          break
-        default:
-          throw new RuntimeException("Docker compose file '$composeFile' was not version 1 or 2 and is unsupported")
-      }
-
-      List<String> allServices = new ArrayList<>()
-      allServices.addAll(composeServices.keySet())
-
-      List<List<String>> splitServices = allServices.split { this.isExecutableImage(it) }
-      project.logger.info 'The following docker compose services were found to be executable: {}', splitServices[0]
-      longRunningServices = splitServices[1]
-      project.logger.info 'The following docker compose services were found to be long-running: {}', longRunningServices
-      if (longRunningServices.empty) {
-        throw new IllegalStateException('No long-running service defined in docker compose file')
-      }
+      stackwork.dockerComposeRunner.loadComposeInfo()
+      composeVersion = stackwork.dockerComposeRunner.composeVersion
+      longRunningServices = stackwork.dockerComposeRunner.longRunningServices
     }
 
     doLast {
@@ -181,16 +151,6 @@ class RunDockerComposeTask extends AbstractTask {
         }
       }
     }
-  }
-
-  boolean isExecutableImage(String serviceName) {
-    Project composeProject = project.extensions.getByType(StackworkExtension).composeProject
-    StackworkObject composeProjectStackwork = composeProject.stackwork
-    boolean serviceImageIsBuiltInModule = composeProjectStackwork.modules["$serviceName"]
-    if (!serviceImageIsBuiltInModule) return false
-
-    ModuleType moduleType = composeProjectStackwork.modules["$serviceName"]
-    moduleType == TEST_IMAGE
   }
 
   String askComposeServicesContainerId(String serviceName) {

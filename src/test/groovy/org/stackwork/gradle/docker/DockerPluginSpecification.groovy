@@ -1,5 +1,6 @@
 package org.stackwork.gradle.docker
 
+import spock.lang.Ignore
 import spock.lang.IgnoreRest
 import spock.lang.Specification
 
@@ -201,6 +202,16 @@ class DockerPluginSpecification extends Specification {
     ! output.standardOut.contains(':stack:cleanDockerCompose SKIPPED')
 
     and: 'The build fails'
+    output.process.exitValue() != 0
+  }
+
+  @Ignore
+  def 'A builder image can be used to alter an image produced by a Dockerfile'() {
+    when:
+    GradleOutput output = runGradleTask('builder-image')
+
+    then:
+    output.standardOut.contains 'added via ssh by a builder image'
     output.process.exitValue() != 0
   }
 

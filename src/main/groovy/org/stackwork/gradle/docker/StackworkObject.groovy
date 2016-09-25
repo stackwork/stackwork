@@ -24,7 +24,6 @@ class StackworkObject {
   String dockerFile
   String imageId
   String fullImageName
-  String composeFile
   String composeProject
   String host
   String baseComposeStack

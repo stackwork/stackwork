@@ -17,7 +17,7 @@ class RunDockerComposeTask extends AbstractTask {
   @Internal final StackworkObject stackwork = project.stackwork
 
   @Internal List<String> longRunningServices
-  @Internal String composeFile = stackwork.composeFile
+  @Internal String composeFile = stackwork.dockerComposeRunner.composeFilePath
   @Internal Process composeProcess
   @Internal String composeProject = stackwork.dockerComposeRunner.projectId
 

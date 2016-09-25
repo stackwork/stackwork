@@ -13,7 +13,7 @@ class GenerateDockerComposeFileTask extends Copy {
 
     outputs.upToDateWhen {false}
 
-    stackwork.composeFile = "${stackwork.buildDir}/docker-compose.yml"
+    stackwork.dockerComposeRunner.composeFilePath = "${stackwork.buildDir}/docker-compose.yml"
 
     group = 'Stackwork'
     description = 'Generates the Docker Compose file'

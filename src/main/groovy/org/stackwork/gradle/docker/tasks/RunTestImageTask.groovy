@@ -22,7 +22,7 @@ class RunTestImageTask extends AbstractTask {
 
       OutputStream containerNameOutput = new ByteArrayOutputStream()
       project.exec {
-        setCommandLine(['docker-compose', '-f', composeProjectStackwork.composeFile,
+        setCommandLine(['docker-compose', '-f', composeProjectStackwork.dockerComposeRunner.composeFilePath,
                         '-p', composeProjectStackwork.dockerComposeRunner.projectId, 'run', '-d', project.name])
         setStandardOutput containerNameOutput
       }

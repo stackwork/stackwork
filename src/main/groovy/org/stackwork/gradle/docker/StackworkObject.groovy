@@ -31,14 +31,13 @@ class StackworkObject {
   /**
    * Container ID in case of a module that has an executable image such as a {@link ModuleType.TEST_IMAGE}
    */
-  File composeLogFile
   String containerId
   DockerComposeRunner dockerComposeRunner
+  File composeLogFile
 
   StackworkObject(Project project) {
     this.project = project
     buildDir = "${project.buildDir}/stackwork-plugin"
-    dockerComposeRunner = new DockerComposeRunner(project)
   }
 
 }

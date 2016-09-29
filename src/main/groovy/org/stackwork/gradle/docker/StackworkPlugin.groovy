@@ -50,6 +50,7 @@ class StackworkPlugin implements Plugin<Project> {
     project.extensions.create('stackwork', StackworkExtension, project)
     stackworkObject = new StackworkObject(project)
     project.ext.stackwork = stackworkObject
+    stackworkObject.dockerComposeRunner = new DockerComposeRunner(project, stackworkObject)
 
     evaluateEnvironment()
 

@@ -1,6 +1,5 @@
 package org.stackwork.gradle.docker.tasks
 
-import org.gradle.api.GradleException
 import org.gradle.api.internal.AbstractTask
 import org.gradle.api.tasks.Internal
 import org.stackwork.gradle.docker.StackworkExtension
@@ -16,36 +15,12 @@ class StopDockerComposeTask extends AbstractTask {
     group = 'Stackwork'
     description = 'Stops the docker compose services'
 
-    RunDockerComposeTask runDockerComposeTask = project.tasks.runDockerCompose as RunDockerComposeTask
-
     onlyIf {
       project.extensions.getByType(StackworkExtension).stopContainers
     }
 
     doLast {
-      OutputStream out = new ByteArrayOutputStream()
-      project.exec {
-        // count the number of containers already exited with a non-zero exit code. Running container are seen by
-        // docker inspect to have ExitCode = 0
-        String commandToSeeIfAnyContainersOfTheStackFailed =
-            "docker-compose -f \"${runDockerComposeTask.composeFile}\" -p \"${runDockerComposeTask.composeProject}\" ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v 0 | wc -l | tr -d ' '"
-        commandLine('bash', '-c', commandToSeeIfAnyContainersOfTheStackFailed)
-        standardOutput = out
-      }
-      int nrOfNonZeroExitCodes = out.toString() as Integer
-
-      project.exec {
-        commandLine 'docker-compose', '-f', "${-> stackwork.dockerComposeRunner.composeFilePath}",
-            '-p', "${-> stackwork.dockerComposeRunner.projectId}", 'stop'
-      }
-
-      logger.info "Stack will be exited. '$nrOfNonZeroExitCodes' container(s) already have a non-zero exit code."
-      if (nrOfNonZeroExitCodes != 0) {
-        def msg = "The docker compose process in project '$project.name' will be shut down. However, " +
-            "'$nrOfNonZeroExitCodes' container(s) exited with a non-zero exit code, so we're failing the build."
-        logger.error msg
-        throw new GradleException(msg)
-      }
+      stackwork.dockerComposeRunner.stop()
     }
   }
 

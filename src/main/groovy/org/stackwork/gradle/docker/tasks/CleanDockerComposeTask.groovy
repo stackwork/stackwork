@@ -1,11 +1,11 @@
 package org.stackwork.gradle.docker.tasks
 
-import org.gradle.api.tasks.Exec
+import org.gradle.api.internal.AbstractTask
 import org.gradle.api.tasks.Internal
 import org.stackwork.gradle.docker.StackworkExtension
 import org.stackwork.gradle.docker.StackworkObject
 
-class CleanDockerComposeTask extends Exec {
+class CleanDockerComposeTask extends AbstractTask {
 
   final static NAME = 'cleanDockerCompose'
   @Internal final StackworkObject stackwork = project.stackwork
@@ -18,8 +18,9 @@ class CleanDockerComposeTask extends Exec {
       project.extensions.getByType(StackworkExtension).stopContainers
     }
 
-    commandLine 'docker-compose', '-f', "${-> stackwork.dockerComposeRunner.composeFilePath}",
-        '-p', "${-> stackwork.dockerComposeRunner.projectId}", 'down'
+    doLast {
+      stackwork.dockerComposeRunner.clean()
+    }
   }
 
 }

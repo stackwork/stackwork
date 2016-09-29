@@ -16,6 +16,7 @@ class DockerComposeRunner {
   final Project project
   final StackworkObject stackwork
   final String projectId = createRandomComposeProjectId()
+  final String composeFileName
 
   String composeFilePath
   Process composeProcess
@@ -25,20 +26,21 @@ class DockerComposeRunner {
   private boolean infoLoaded = false
   private Map<String, Object> composeInfo
 
-  DockerComposeRunner(Project project, StackworkObject stackwork) {
+  DockerComposeRunner(Project project, StackworkObject stackwork, String composeFileName) {
     this.project = project
     this.stackwork = stackwork
+    this.composeFileName = composeFileName
     // default value for compose file path - can be overridden in case of a docker compose template file
-    composeFilePath = "${project.rootDir}/docker-compose.yml"
+    composeFilePath = "${project.rootDir}/${composeFileName}"
   }
 
   void generateComposeFile() {
-    stackwork.dockerComposeRunner.composeFilePath = "${stackwork.buildDir}/docker-compose.yml"
+    composeFilePath = "${stackwork.buildDir}/${composeFileName}"
     project.copy {
       from project.projectDir
       into stackwork.buildDir
-      include 'docker-compose.yml.template'
-      rename { file -> 'docker-compose.yml' }
+      include "${composeFileName}.template"
+      rename { file -> composeFileName }
       expand project.properties
     }
   }
@@ -260,7 +262,7 @@ class DockerComposeRunner {
 
     File logDir = project.file("${stackwork.buildDir}/logs")
     logDir.mkdirs()
-    File logFile = new File(logDir, "docker-compose-${stackwork.dockerComposeRunner.projectId}.log")
+    File logFile = new File(logDir, "docker-compose-${projectId}.log")
     stackwork.composeLogFile = logFile
     logFile.createNewFile()
     Process compose = new ProcessBuilder(command).

@@ -195,6 +195,12 @@ class DockerPluginSpecification extends Specification {
         'Stack started.'
     output.standardErr.contains("The docker compose process in project 'stack' will be shut down. However, '1' " +
         "container(s) exited with a non-zero exit code, so we're failing the build.")
+
+    and: 'The clean docker compose task did run'
+    output.standardOut.contains ':stack:cleanDockerCompose'
+    ! output.standardOut.contains(':stack:cleanDockerCompose SKIPPED')
+
+    and: 'The build fails'
     output.process.exitValue() != 0
   }
 

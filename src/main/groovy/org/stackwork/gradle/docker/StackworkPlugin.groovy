@@ -130,6 +130,7 @@ class StackworkPlugin implements Plugin<Project> {
       stackworkTestStart.dependsOn getComposeProject().tasks.getByName(RunDockerComposeTask.NAME)
       getComposeProject().tasks.getByName(StopDockerComposeTask.NAME).mustRunAfter stackworkTest
     }
+    runCompose.finalizedBy stopCompose
     runCompose.finalizedBy cleanCompose
 
     tagImage.dependsOn project.getTasksByName(HookTaskNames.STACKWORK_CHECK_TASK_NAME, RECURSIVE)
@@ -145,7 +146,7 @@ class StackworkPlugin implements Plugin<Project> {
     generateComposeFile.dependsOn buildImage
     runCompose.dependsOn generateComposeFile
     stopCompose.dependsOn runCompose
-    cleanCompose.dependsOn stopCompose
+    cleanCompose.mustRunAfter stopCompose
   }
 
   private void filterInternalTasksToRun() {

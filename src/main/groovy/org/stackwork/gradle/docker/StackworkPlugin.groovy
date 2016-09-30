@@ -5,20 +5,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPlugin
-import org.stackwork.gradle.docker.tasks.BuildImageTask
-import org.stackwork.gradle.docker.tasks.CleanDockerComposeTask
-import org.stackwork.gradle.docker.tasks.CollectImageDependenciesTask
-import org.stackwork.gradle.docker.tasks.DockerComposeRunner
-import org.stackwork.gradle.docker.tasks.GenerateDockerComposeFileTask
-import org.stackwork.gradle.docker.tasks.HookTaskNames
-import org.stackwork.gradle.docker.tasks.PrepareDockerFileTask
-import org.stackwork.gradle.docker.tasks.PushImageTask
-import org.stackwork.gradle.docker.tasks.RunDockerComposeTask
-import org.stackwork.gradle.docker.tasks.RunTestImageTask
-import org.stackwork.gradle.docker.tasks.StopDockerComposeTask
-import org.stackwork.gradle.docker.tasks.TagImageTask
+import org.stackwork.gradle.docker.tasks.*
 
-import static ModuleType.*
+import static org.stackwork.gradle.docker.ModuleType.*
 
 class StackworkPlugin implements Plugin<Project> {
 
@@ -31,7 +20,7 @@ class StackworkPlugin implements Plugin<Project> {
   private Task stackworkCheck
 
   private Task collectDependencies
-  private Task prepareDockerFile
+  private Task parseDockerFileTemplate
   private Task buildImage
   private Task cleanCompose
   private Task runCompose
@@ -39,7 +28,7 @@ class StackworkPlugin implements Plugin<Project> {
   private Task pushImage
   private Task tagImage
   private Task runTestImage
-  private Task generateComposeFile
+  private Task parseComposeTemplate
 
   private StackworkObject stackworkObject
 
@@ -113,11 +102,11 @@ class StackworkPlugin implements Plugin<Project> {
     }
 
     collectDependencies = createTask(CollectImageDependenciesTask)
-    prepareDockerFile = createTask(PrepareDockerFileTask)
+    parseDockerFileTemplate = createTask(ParseDockerFileTemplateTask)
     buildImage = createTask(BuildImageTask)
     tagImage = createTask(TagImageTask)
     pushImage = createTask(PushImageTask)
-    generateComposeFile = createTask(GenerateDockerComposeFileTask)
+    parseComposeTemplate = createTask(ParseComposeTemplateTask)
     runCompose = createTask(RunDockerComposeTask)
     stopCompose = createTask(StopDockerComposeTask)
     cleanCompose = createTask(CleanDockerComposeTask)
@@ -142,11 +131,11 @@ class StackworkPlugin implements Plugin<Project> {
   }
 
   private void orderInternalTasks() {
-    buildImage.dependsOn collectDependencies, prepareDockerFile
+    buildImage.dependsOn collectDependencies, parseDockerFileTemplate
     tagImage.dependsOn buildImage
     pushImage.dependsOn tagImage
-    generateComposeFile.dependsOn buildImage
-    runCompose.dependsOn generateComposeFile
+    parseComposeTemplate.dependsOn buildImage
+    runCompose.dependsOn parseComposeTemplate
     stopCompose.dependsOn runCompose
     cleanCompose.mustRunAfter stopCompose
   }
@@ -160,7 +149,7 @@ class StackworkPlugin implements Plugin<Project> {
     buildImage.onlyIf shouldBuildImage
     tagImage.onlyIf { isModuleType(DELIVERABLE_IMAGE) }
     pushImage.onlyIf { isModuleType(DELIVERABLE_IMAGE) }
-    generateComposeFile.onlyIf { isComposeEnabledProject() }
+    parseComposeTemplate.onlyIf { isComposeEnabledProject() }
     runCompose.onlyIf { isComposeEnabledProject() }
     stopCompose.onlyIf { isComposeEnabledProject() }
     cleanCompose.onlyIf { isComposeEnabledProject() }
@@ -177,14 +166,14 @@ class StackworkPlugin implements Plugin<Project> {
   private void coupleGenerateDockerfileToBuildOfBaseImage() {
     def baseImageProject = getBaseImageProject()
     if (baseImageProject) {
-      prepareDockerFile.dependsOn baseImageProject.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
+      parseDockerFileTemplate.dependsOn baseImageProject.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
     }
   }
 
   private void coupleComposeTasksToRelatedModulesBuildTasks() {
     Project parentOrSelf = project.parent ?: project
     // make docker-compose run after all sibling and child projects have built their images
-    generateComposeFile.dependsOn parentOrSelf.getTasksByName(BuildImageTask.NAME, RECURSIVE)
+    parseComposeTemplate.dependsOn parentOrSelf.getTasksByName(BuildImageTask.NAME, RECURSIVE)
   }
 
   private void loadBaseComposeStackIfItExists() {

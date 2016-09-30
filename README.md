@@ -118,7 +118,7 @@ build task | property
 n.a. done always | host
 buildImage | imageId
 tagImage   | fullImageName
-generateDockerComposeFile | composeFile
+parseComposeTemplate | composeFile
 runDockerCompose | services.SERVICE_NAME.host
 runDockerCompose | services.SERVICE_NAME.port
 
@@ -129,9 +129,9 @@ The `buildImage` task executes a docker build command in the root of your projec
 You can have only a single Dockerfile, and the deliverable of the project is a single Docker image.
 The resulting image id is exposed to Gradle via the stackwork object.
 
-### Gradle task generateDockerComposeFile
+### Gradle task parseComposeTemplate
 
-The `generateDockerComposeFile` task parses the `docker-compose.yml.template` file in the projects `src/test` with all
+The `parseComposeTemplate` task parses the `docker-compose.yml.template` file in the projects `src/test` with all
 project properties. Possible usage is a template file containing
 
     service:
@@ -146,7 +146,7 @@ Dependency: buildImage
 The `runDockerCompose` task runs the generated docker compose file. It also exposes host and port for each service
 through the stackwork object in the form of a map.
 
-Dependency: generateDockerComposeFile
+Dependency: parseComposeTemplate
 
 ### Gradle task stopDockerCompose
 

@@ -4,12 +4,12 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Internal
 import org.stackwork.gradle.docker.StackworkObject
 
-class PrepareDockerFileTask extends Copy {
+class ParseDockerFileTemplateTask extends Copy {
 
-  final static NAME = 'prepareDockerFile'
+  final static NAME = 'parseDockerFileTemplate'
   @Internal final StackworkObject stackwork = project.stackwork
 
-  PrepareDockerFileTask() {
+  ParseDockerFileTemplateTask() {
     group = 'Stackwork'
     description = 'Prepares the Dockerfile, activates parsing a template if needed'
     onlyIf { usingDockerfileTemplate() }

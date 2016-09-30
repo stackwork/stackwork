@@ -34,7 +34,7 @@ class DockerComposeRunner {
     composeFilePath = "${project.rootDir}/${composeFileName}"
   }
 
-  void generateComposeFile() {
+  void parseComposeTemplate() {
     composeFilePath = "${stackwork.buildDir}/${composeFileName}"
     project.copy {
       from project.projectDir

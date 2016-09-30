@@ -4,12 +4,12 @@ import org.gradle.api.internal.AbstractTask
 import org.gradle.api.tasks.Internal
 import org.stackwork.gradle.docker.StackworkObject
 
-class GenerateDockerComposeFileTask extends AbstractTask {
+class ParseComposeTemplateTask extends AbstractTask {
 
-  final static NAME = 'generateDockerComposeFile'
+  final static NAME = 'parseComposeTemplate'
   @Internal final StackworkObject stackwork = project.stackwork
 
-  GenerateDockerComposeFileTask() {
+  ParseComposeTemplateTask() {
 
     outputs.upToDateWhen { false }
 
@@ -17,7 +17,7 @@ class GenerateDockerComposeFileTask extends AbstractTask {
     description = 'Generates the Docker Compose file'
 
     doLast {
-      stackwork.dockerComposeRunner.generateComposeFile()
+      stackwork.dockerComposeRunner.parseComposeTemplate()
     }
   }
 

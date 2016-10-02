@@ -4,6 +4,10 @@ services:
 jdk: oraclejdk8
 language: groovy
 
+branches:
+  except:
+  - /^tmp-.*$/
+
 env:
   DOCKER_COMPOSE_VERSION: 1.8.0
 

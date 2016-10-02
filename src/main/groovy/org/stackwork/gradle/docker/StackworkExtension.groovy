@@ -7,7 +7,7 @@ import static ModuleType.DEFAULT
 class StackworkExtension {
 
   /**
-   * Indicates whether containers should be stopped after the tests are executed.
+   * Indicates whether containers should be stopped after the tests are executed. Defaults to true.
    */
   Boolean stopContainers = true
 
@@ -33,11 +33,24 @@ class StackworkExtension {
   String imageName
 
   /**
-   * Marker that Docker Compose logs are scanned for, when found this indicates the stack is running.
+   * Marker that Docker Compose logs are scanned for. When found this indicates the stack is running.
    */
   String stackIsRunningWhenLogContains
 
-  private Project project
+  /**
+   * Denotes that after processing the Dockerfile[.template], the build.docker-compose.yml[.template] file should be
+   * used the modify the image. Often used in conjunction with dependencies on other projects using 'baseImageProject'.
+   * Defaults to false.
+   */
+  Boolean useBuildStack = false
+
+  /**
+   * Marker that Docker Compose logs are scanned for during the build process in case of using a 'builderImageProject'.
+   * when found this indicates the stack is running.
+   */
+  String buildStackIsRunningWhenLogContains
+
+  private final Project project
 
   StackworkExtension(Project project) {
     this.project = project
@@ -53,6 +66,8 @@ class StackworkExtension {
             ", baseImageProject=" + baseImageProject +
             ", imageName='" + imageName + '\'' +
             ", stackIsRunningWhenLogContains='" + stackIsRunningWhenLogContains + '\'' +
+            ", useBuildStack='" + useBuildStack + '\'' +
+            ", buildStackIsRunningWhenLogContains='" + buildStackIsRunningWhenLogContains + '\'' +
             ", project=" + project +
             '}';
   }

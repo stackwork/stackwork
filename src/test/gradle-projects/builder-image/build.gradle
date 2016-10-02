@@ -13,7 +13,8 @@ apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
 
 stackwork {
   moduleType = IMAGE
-  builderImageProject = project.project ':builder'
+  useBuildStack = true
+  baseImageProject = project.project ':builder'
   buildStackIsRunningWhenLogContains = 'SSH server running'
 }
 
@@ -26,6 +27,4 @@ task('runImage',
 }
 
 tasks.runImage.dependsOn tasks.buildImage
-//afterEvaluate {
-  tasks.stackworkCheck.dependsOn tasks.runImage
-//}
+tasks.stackworkCheck.dependsOn tasks.runImage

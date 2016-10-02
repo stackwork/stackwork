@@ -42,7 +42,7 @@ class StackworkExtension {
    * used the modify the image. Often used in conjunction with dependencies on other projects using 'imageBuildDependencies'.
    * Defaults to false.
    */
-  Boolean useBuildStack = false
+  Boolean applyBuildStepWithStack = false
 
   /**
    * Marker that Docker Compose logs are scanned for during the build process in case of using a 'builderImageProject'.
@@ -74,7 +74,7 @@ class StackworkExtension {
             ", imageBuildDependencies=" + imageBuildDependencies +
             ", imageName='" + imageName + '\'' +
             ", stackIsRunningWhenLogContains='" + stackIsRunningWhenLogContains + '\'' +
-            ", useBuildStack='" + useBuildStack + '\'' +
+            ", applyBuildStepWithStack='" + applyBuildStepWithStack + '\'' +
             ", buildStackIsRunningWhenLogContains='" + buildStackIsRunningWhenLogContains + '\'' +
             ", project=" + project +
             '}';

@@ -8,6 +8,8 @@ import org.gradle.api.plugins.JavaPlugin
 import org.stackwork.gradle.docker.tasks.*
 
 import static org.stackwork.gradle.docker.ModuleType.*
+import static org.stackwork.gradle.docker.tasks.DockerComposeRunner.newBuildDockerComposeRunner
+import static org.stackwork.gradle.docker.tasks.DockerComposeRunner.newDockerComposeRunner
 
 class StackworkPlugin implements Plugin<Project> {
 
@@ -29,6 +31,7 @@ class StackworkPlugin implements Plugin<Project> {
   private Task tagImage
   private Task runTestImage
   private Task parseComposeTemplate
+  private Task buildStepWithStack
 
   private StackworkObject stackworkObject
 
@@ -39,7 +42,7 @@ class StackworkPlugin implements Plugin<Project> {
     project.extensions.create('stackwork', StackworkExtension, project)
     stackworkObject = new StackworkObject(project)
     project.ext.stackwork = stackworkObject
-    stackworkObject.dockerComposeRunner = new DockerComposeRunner(project, stackworkObject, 'docker-compose.yml')
+    stackworkObject.dockerComposeRunner = newDockerComposeRunner(project, stackworkObject)
 
     evaluateEnvironment()
 
@@ -66,7 +69,11 @@ class StackworkPlugin implements Plugin<Project> {
       StackworkObject stackworkOfComposeProject = getComposeProject().stackwork
       stackworkOfComposeProject.modules["${project.name}"] = getModuleType()
       coupleComposeTasksToRelatedModulesBuildTasks()
-      coupleGenerateDockerfileToBuildOfBaseImage()
+      orderBuildTasksForImageBuildDependencies()
+      if (applyBuildStepWithStack()) {
+        stackworkObject.buildDockerComposeRunner = newBuildDockerComposeRunner(project, stackworkObject)
+        registerAndOrderBuildStepWithStackTask()
+      }
     }
   }
 
@@ -96,11 +103,11 @@ class StackworkPlugin implements Plugin<Project> {
     }
   }
 
-  private void registerInternalTasks() {
-    Closure<Task> createTask = { Class<? extends Task> namedClazz ->
-      project.task(namedClazz.NAME, type: namedClazz)
-    }
+  private final Closure<Task> createTask = { Class<? extends Task> namedClazz ->
+    project.task(namedClazz.NAME, type: namedClazz)
+  }
 
+  private void registerInternalTasks() {
     collectDependencies = createTask(CollectImageDependenciesTask)
     parseDockerFileTemplate = createTask(ParseDockerFileTemplateTask)
     buildImage = createTask(BuildImageTask)
@@ -140,11 +147,11 @@ class StackworkPlugin implements Plugin<Project> {
     cleanCompose.mustRunAfter stopCompose
   }
 
-  private void filterInternalTasksToRun() {
-    Closure<Boolean> shouldBuildImage = {
-      isModuleType(DELIVERABLE_IMAGE) || isModuleType(TEST_IMAGE) || isModuleType(IMAGE)
-    }
+  private final Closure<Boolean> shouldBuildImage = {
+    isModuleType(DELIVERABLE_IMAGE) || isModuleType(TEST_IMAGE) || isModuleType(IMAGE) || isModuleType(BUILDER_IMAGE)
+  }
 
+  private void filterInternalTasksToRun() {
     collectDependencies.onlyIf shouldBuildImage
     buildImage.onlyIf shouldBuildImage
     tagImage.onlyIf { isModuleType(DELIVERABLE_IMAGE) }
@@ -163,9 +170,10 @@ class StackworkPlugin implements Plugin<Project> {
         (isModuleType(TEST) && !dependsOnComposeProject)
   }
 
-  private void coupleGenerateDockerfileToBuildOfBaseImage() {
+  private void orderBuildTasksForImageBuildDependencies() {
     getImageBuildDependencies().each {
       parseDockerFileTemplate.dependsOn it.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
+      buildImage.dependsOn it.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
     }
   }
 
@@ -173,6 +181,14 @@ class StackworkPlugin implements Plugin<Project> {
     Project parentOrSelf = project.parent ?: project
     // make docker-compose run after all sibling and child projects have built their images
     parseComposeTemplate.dependsOn parentOrSelf.getTasksByName(BuildImageTask.NAME, RECURSIVE)
+  }
+
+  private void registerAndOrderBuildStepWithStackTask() {
+    buildStepWithStack = createTask(BuildStepWithStackTask)
+    buildStepWithStack.dependsOn buildImage
+    tagImage.dependsOn buildStepWithStack
+    parseComposeTemplate.dependsOn buildStepWithStack
+    buildStepWithStack.onlyIf shouldBuildImage
   }
 
   private void loadBaseComposeStackIfItExists() {
@@ -208,6 +224,13 @@ class StackworkPlugin implements Plugin<Project> {
    */
   private Project getComposeProject() {
     project.extensions.getByType(StackworkExtension).composeProject
+  }
+
+  /**
+   * depends on extension, so must be called after evaluation
+   */
+  private Boolean applyBuildStepWithStack() {
+    project.extensions.getByType(StackworkExtension).applyBuildStepWithStack
   }
 
 }

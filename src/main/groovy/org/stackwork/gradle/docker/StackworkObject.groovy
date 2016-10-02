@@ -33,7 +33,9 @@ class StackworkObject {
    */
   String containerId
   DockerComposeRunner dockerComposeRunner
+  DockerComposeRunner buildDockerComposeRunner
   File composeLogFile
+  File buildComposeLogFile
 
   StackworkObject(Project project) {
     this.project = project

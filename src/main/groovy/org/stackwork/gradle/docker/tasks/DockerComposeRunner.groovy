@@ -18,6 +18,7 @@ class DockerComposeRunner {
   final StackworkObject stackwork
   final String projectId = createRandomComposeProjectId()
   final String composeFileName
+  final boolean buildRunner
 
   String composeFilePath
   Process composeProcess
@@ -27,10 +28,19 @@ class DockerComposeRunner {
   private boolean infoLoaded = false
   private Map<String, Object> composeInfo
 
-  DockerComposeRunner(Project project, StackworkObject stackwork, String composeFileName) {
+  static DockerComposeRunner newDockerComposeRunner(Project project, StackworkObject stackwork) {
+    new DockerComposeRunner(project, stackwork, false)
+  }
+
+  static DockerComposeRunner newBuildDockerComposeRunner(Project project, StackworkObject stackwork) {
+    new DockerComposeRunner(project, stackwork, true)
+  }
+
+  private DockerComposeRunner(Project project, StackworkObject stackwork, boolean buildRunner) {
     this.project = project
     this.stackwork = stackwork
-    this.composeFileName = composeFileName
+    this.composeFileName = buildRunner ? 'build.docker-compose.yml' : 'docker-compose.yml'
+    this.buildRunner = buildRunner
     // default value for compose file path - can be overridden in case of a docker compose template file
     composeFilePath = "${project.rootDir}/${composeFileName}"
   }
@@ -87,7 +97,7 @@ class DockerComposeRunner {
    * Must run after {@link GenerateDockerComposeFileTask}, since that may change the {@link this.composeFilePath}
    * @return
    */
-  void loadComposeInfo() {
+  private void loadComposeInfo() {
     composeInfo = new Yaml().load(project.file(composeFilePath).text) as Map<String, Object>
     infoLoaded = true
     findComposeVersion()
@@ -155,10 +165,12 @@ class DockerComposeRunner {
   /**
    * Start the long running services for the compose project and monitor it's output
    */
-  void startLongRunningServiceAndWaitForLogMarker() {
+  private void startLongRunningServiceAndWaitForLogMarker() {
     String[] command = ['docker-compose', '-f', composeFilePath, '-p', projectId, 'up'] + this.longRunningServices
 
-    String marker = project.extensions.getByType(StackworkExtension).stackIsRunningWhenLogContains
+    String marker = buildRunner ?
+        project.extensions.getByType(StackworkExtension).buildStackIsRunningWhenLogContains :
+        project.extensions.getByType(StackworkExtension).stackIsRunningWhenLogContains
 
     if (marker) {
       project.logger.info 'Log marker defined: "{}". Using this to scan logs for start indicator.', marker
@@ -188,7 +200,7 @@ class DockerComposeRunner {
     }
   }
 
-  void writeServiceHostsAndPorts() {
+  private void writeServiceHostsAndPorts() {
     longRunningServices.each { String serviceName ->
       Map<String, Object> serviceInfo = [:]
       String containerId = this.askComposeServicesContainerId(serviceName)
@@ -259,12 +271,18 @@ class DockerComposeRunner {
    *
    * TODO: add configurable time-out functionality in case the predicate is never fulfilled
    */
-  void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
+  private void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
 
     File logDir = project.file("${stackwork.buildDir}/logs")
     logDir.mkdirs()
-    File logFile = new File(logDir, "docker-compose-${projectId}.log")
-    stackwork.composeLogFile = logFile
+    File logFile = buildRunner ?
+        new File(logDir, "build.docker-compose-${projectId}.log") :
+        new File(logDir, "docker-compose-${projectId}.log")
+    if (buildRunner) {
+      stackwork.composeLogFile = logFile
+    } else {
+      stackwork.buildComposeLogFile = logFile
+    }
     logFile.createNewFile()
     Process compose = new ProcessBuilder(command).
         redirectErrorStream(true).

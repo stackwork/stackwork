@@ -205,14 +205,14 @@ class DockerPluginSpecification extends Specification {
     output.process.exitValue() != 0
   }
 
-  @Ignore
+  @IgnoreRest
   def 'A builder image can be used to alter an image produced by a Dockerfile'() {
     when:
     GradleOutput output = runGradleTask('builder-image')
 
     then:
     output.standardOut.contains 'added via ssh by a builder image'
-    output.process.exitValue() != 0
+    output.process.exitValue() == 0
   }
 
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {

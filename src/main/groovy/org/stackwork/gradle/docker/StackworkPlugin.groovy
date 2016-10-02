@@ -164,9 +164,8 @@ class StackworkPlugin implements Plugin<Project> {
   }
 
   private void coupleGenerateDockerfileToBuildOfBaseImage() {
-    def baseImageProject = getBaseImageProject()
-    if (baseImageProject) {
-      parseDockerFileTemplate.dependsOn baseImageProject.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
+    getImageBuildDependencies().each {
+      parseDockerFileTemplate.dependsOn it.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
     }
   }
 
@@ -200,8 +199,8 @@ class StackworkPlugin implements Plugin<Project> {
   /**
    * depends on extension, so must be called after evaluation
    */
-  private Project getBaseImageProject() {
-    project.extensions.getByType(StackworkExtension).baseImageProject
+  private List<Project> getImageBuildDependencies() {
+    project.extensions.getByType(StackworkExtension).imageBuildDependencies
   }
 
   /**

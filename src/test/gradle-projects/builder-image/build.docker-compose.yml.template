@@ -1,5 +1,5 @@
 service:
-  image: ${stackwork.imageId}
+  image: ${project.stackwork.imageId}
   expose: 22
   command: ['/etc/init.d/sshd', 'start']
 

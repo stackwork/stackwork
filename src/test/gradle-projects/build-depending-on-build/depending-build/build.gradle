@@ -4,7 +4,7 @@ apply plugin: 'stackwork'
 
 stackwork {
   moduleType = IMAGE
-  baseImageProject = project ':zzz-base'
+  imageBuildDependencies = project ':zzz-base'
 }
 
 task('inspectImage',

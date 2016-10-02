@@ -14,7 +14,7 @@ apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
 stackwork {
   moduleType = IMAGE
   useBuildStack = true
-  baseImageProject = project.project ':builder'
+  imageBuildDependencies = [project.project(':builder'), project.project(':base')]
   buildStackIsRunningWhenLogContains = 'SSH server running'
 }
 

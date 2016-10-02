@@ -22,9 +22,9 @@ class StackworkExtension {
   Project composeProject
 
   /**
-   * The project on which this projects image build depends. Defaults to null, meaning no dependency
+   * The projects on which this projects image build depends. Defaults to an empty list, meaning no dependency.
    */
-  Project baseImageProject
+  List<Project> imageBuildDependencies = []
 
   /**
    * Name of the image. E.g. repo:1234/namespace/name. The name should not contain a version, because this name will be
@@ -39,7 +39,7 @@ class StackworkExtension {
 
   /**
    * Denotes that after processing the Dockerfile[.template], the build.docker-compose.yml[.template] file should be
-   * used the modify the image. Often used in conjunction with dependencies on other projects using 'baseImageProject'.
+   * used the modify the image. Often used in conjunction with dependencies on other projects using 'imageBuildDependencies'.
    * Defaults to false.
    */
   Boolean useBuildStack = false
@@ -57,13 +57,21 @@ class StackworkExtension {
     this.composeProject = this.project
   }
 
+  void setImageBuildDependencies(List<Project> imageBuildDependencies) {
+    this.imageBuildDependencies = imageBuildDependencies
+  }
+
+  void setImageBuildDependencies(Project imageBuildDependency) {
+    this.imageBuildDependencies = [imageBuildDependency]
+  }
+
   @Override
   public String toString() {
     return "StackworkExtension{" +
             "stopContainers=" + stopContainers +
             ", moduleType=" + moduleType +
             ", composeProject=" + composeProject +
-            ", baseImageProject=" + baseImageProject +
+            ", imageBuildDependencies=" + imageBuildDependencies +
             ", imageName='" + imageName + '\'' +
             ", stackIsRunningWhenLogContains='" + stackIsRunningWhenLogContains + '\'' +
             ", useBuildStack='" + useBuildStack + '\'' +

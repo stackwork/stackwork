@@ -9,6 +9,7 @@ import org.stackwork.gradle.docker.exceptions.IllegalDockerComposeFileVersionExc
 import org.yaml.snakeyaml.Yaml
 
 import static java.lang.Integer.parseInt
+import static org.stackwork.gradle.docker.ModuleType.BUILDER_IMAGE
 import static org.stackwork.gradle.docker.ModuleType.TEST_IMAGE
 
 class DockerComposeRunner {
@@ -131,7 +132,7 @@ class DockerComposeRunner {
       if (!serviceImageIsBuiltInModule) return false
 
       ModuleType moduleType = composeProjectStackwork.modules["$serviceName"]
-      moduleType == TEST_IMAGE
+      moduleType == TEST_IMAGE || moduleType == BUILDER_IMAGE
     }
 
     List<String> allServices = []

@@ -18,6 +18,7 @@ class DockerComposeRunner {
   final StackworkObject stackwork
   final String projectId = createRandomComposeProjectId()
   final String composeFileName
+  final boolean buildRunner
 
   String composeFilePath
   Process composeProcess
@@ -27,10 +28,19 @@ class DockerComposeRunner {
   private boolean infoLoaded = false
   private Map<String, Object> composeInfo
 
-  DockerComposeRunner(Project project, StackworkObject stackwork, String composeFileName) {
+  static DockerComposeRunner newDockerComposeRunner(Project project, StackworkObject stackwork) {
+    new DockerComposeRunner(project, stackwork, false)
+  }
+
+  static DockerComposeRunner newBuildDockerComposeRunner(Project project, StackworkObject stackwork) {
+    new DockerComposeRunner(project, stackwork, true)
+  }
+
+  private DockerComposeRunner(Project project, StackworkObject stackwork, boolean buildRunner) {
     this.project = project
     this.stackwork = stackwork
-    this.composeFileName = composeFileName
+    this.composeFileName = buildRunner ? 'build.docker-compose.yml' : 'docker-compose.yml'
+    this.buildRunner = buildRunner
     // default value for compose file path - can be overridden in case of a docker compose template file
     composeFilePath = "${project.rootDir}/${composeFileName}"
   }
@@ -55,14 +65,20 @@ class DockerComposeRunner {
   void stop() {
     OutputStream out = new ByteArrayOutputStream()
     project.exec {
-      // count the number of containers already exited with a non-zero exit code. Running container are seen by
-      // docker inspect to have ExitCode = 0
+      // count the number of containers already exited with a non-zero exit code. These can be either failed executable
+      // images such as a TEST_IMAGE, or a long-running service that has been exited prematurely.
+      // Running container are seen by docker inspect to have ExitCode = 0
       String commandToSeeIfAnyContainersOfTheStackFailed =
           "docker-compose -f \"${->composeFilePath}\" -p \"${->projectId}\" ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v 0 | wc -l | tr -d ' '"
       commandLine 'bash', '-c', commandToSeeIfAnyContainersOfTheStackFailed
       standardOutput = out
     }
     int nrOfNonZeroExitCodes = out.toString() as Integer
+
+    if (nrOfNonZeroExitCodes > 0) {
+      project.logger.error("SDFAFDSSDASDAHSDJAKHSDJKAKSDAJFKSDAJFKSDJAKFJSDAKFJSDKAJKSDAJKSDAJFKDSAJFDKSAJ")
+      Thread.sleep(500000)
+    }
 
     project.exec {
       commandLine 'docker-compose', '-f', "${->composeFilePath}", '-p', "${->projectId}", 'stop'
@@ -87,7 +103,7 @@ class DockerComposeRunner {
    * Must run after {@link GenerateDockerComposeFileTask}, since that may change the {@link this.composeFilePath}
    * @return
    */
-  void loadComposeInfo() {
+  private void loadComposeInfo() {
     composeInfo = new Yaml().load(project.file(composeFilePath).text) as Map<String, Object>
     infoLoaded = true
     findComposeVersion()
@@ -126,13 +142,12 @@ class DockerComposeRunner {
     }
 
     def isExecutableImage = { serviceName ->
-      Project composeProject = project.extensions.getByType(StackworkExtension).composeProject
-      StackworkObject composeProjectStackwork = composeProject.stackwork
-      boolean serviceImageIsBuiltInModule = composeProjectStackwork.modules["$serviceName"]
-      if (!serviceImageIsBuiltInModule) return false
-
-      ModuleType moduleType = composeProjectStackwork.modules["$serviceName"]
-      moduleType == TEST_IMAGE || moduleType == BUILDER_IMAGE
+      def projectRelatedToService = project.rootProject.findProject(":${serviceName}")
+      if (projectRelatedToService) {
+        def moduleType = projectRelatedToService.extensions.findByType(StackworkExtension)?.moduleType
+        return TEST_IMAGE == moduleType || BUILDER_IMAGE == moduleType
+      }
+      return false
     }
 
     List<String> allServices = []
@@ -155,10 +170,12 @@ class DockerComposeRunner {
   /**
    * Start the long running services for the compose project and monitor it's output
    */
-  void startLongRunningServiceAndWaitForLogMarker() {
+  private void startLongRunningServiceAndWaitForLogMarker() {
     String[] command = ['docker-compose', '-f', composeFilePath, '-p', projectId, 'up'] + this.longRunningServices
 
-    String marker = project.extensions.getByType(StackworkExtension).stackIsRunningWhenLogContains
+    String marker = buildRunner ?
+        project.extensions.getByType(StackworkExtension).buildStackIsRunningWhenLogContains :
+        project.extensions.getByType(StackworkExtension).stackIsRunningWhenLogContains
 
     if (marker) {
       project.logger.info 'Log marker defined: "{}". Using this to scan logs for start indicator.', marker
@@ -188,7 +205,7 @@ class DockerComposeRunner {
     }
   }
 
-  void writeServiceHostsAndPorts() {
+  private void writeServiceHostsAndPorts() {
     longRunningServices.each { String serviceName ->
       Map<String, Object> serviceInfo = [:]
       String containerId = this.askComposeServicesContainerId(serviceName)
@@ -259,12 +276,18 @@ class DockerComposeRunner {
    *
    * TODO: add configurable time-out functionality in case the predicate is never fulfilled
    */
-  void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
+  private void spawnProcessAndWaitFor(String[] command, Closure logPredicate) {
 
     File logDir = project.file("${stackwork.buildDir}/logs")
     logDir.mkdirs()
-    File logFile = new File(logDir, "docker-compose-${projectId}.log")
-    stackwork.composeLogFile = logFile
+    File logFile = buildRunner ?
+        new File(logDir, "build.docker-compose-${projectId}.log") :
+        new File(logDir, "docker-compose-${projectId}.log")
+    if (buildRunner) {
+      stackwork.buildComposeLogFile = logFile
+    } else {
+      stackwork.composeLogFile = logFile
+    }
     logFile.createNewFile()
     Process compose = new ProcessBuilder(command).
         redirectErrorStream(true).

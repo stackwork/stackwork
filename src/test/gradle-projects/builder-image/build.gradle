@@ -13,18 +13,7 @@ apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
 
 stackwork {
   moduleType = IMAGE
-  useBuildStack = true
-  imageBuildDependencies = [project.project(':builder'), project.project(':base')]
-  buildStackIsRunningWhenLogContains = 'SSH server running'
+  applyBuildStepWithStack = true
+  imageBuildDependencies = [project.project(':builder'), project.project(':cassandra')]
+  buildStackIsRunningWhenLogContains = 'Starting listening for CQL clients on /0.0.0.0:9042 (unencrypted)'
 }
-
-task('runImage',
-    description: 'Run the image. It should print "added via ssh by a builder image". This fails if that has not ' +
-        'happened, because in that case the command "cat /message" cannot find the file /message',
-    group: 'Stackwork',
-    type: Exec) {
-  commandLine 'docker', 'run', "${-> project.stackwork.imageId}"
-}
-
-tasks.runImage.dependsOn tasks.buildImage
-tasks.stackworkCheck.dependsOn tasks.runImage

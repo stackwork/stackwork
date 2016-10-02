@@ -205,14 +205,12 @@ class DockerPluginSpecification extends Specification {
     output.process.exitValue() != 0
   }
 
-  @Ignore
   def 'A builder image can be used to alter an image produced by a Dockerfile'() {
     when:
     GradleOutput output = runGradleTask('builder-image')
 
     then:
-    output.standardOut.contains 'added via ssh by a builder image'
-    output.process.exitValue() != 0
+    output.process.exitValue() == 0
   }
 
   private static GradleOutput runGradleTask(String project, boolean printStacktrace = true) {
@@ -225,15 +223,9 @@ class DockerPluginSpecification extends Specification {
     // Capture the process output stream for later processing
     def output = new StringBuffer()
     def error = new StringBuffer()
-    process.consumeProcessOutput(output, error)
+    process.consumeProcessOutput new PrintAndRemember(System.out, output), new PrintAndRemember(System.err, error)
 
     process.waitFor()
-    println '>>>>>>>>>>>>>  Standard Out  >>>>>>>>>>> ...'
-    println output.toString()
-    println '... <<<<<<<<<  Standard Out  <<<<<<<<<<<<<<<'
-    println '>>>>>>>>>>>>>  Standard Err  >>>>>>>>>>> ...'
-    println error.toString()
-    println '... <<<<<<<<<  Standard Err  <<<<<<<<<<<<<<<'
     new GradleOutput(process, output.toString(), error.toString())
   }
 
@@ -258,6 +250,38 @@ class DockerPluginSpecification extends Specification {
 
     String getStandardErr() {
       return standardErr
+    }
+  }
+
+  private static class PrintAndRemember implements Appendable {
+
+    private final PrintStream ps
+    private final StringBuffer sb
+
+    PrintAndRemember(PrintStream ps, StringBuffer sb) {
+      this.ps = ps
+      this.sb = sb
+    }
+
+    @Override
+    Appendable append(CharSequence charSequence) throws IOException {
+      sb.append charSequence
+      ps.append charSequence
+      return this
+    }
+
+    @Override
+    Appendable append(CharSequence charSequence, int i, int i1) throws IOException {
+      sb.append charSequence, i, i1
+      ps.append charSequence, i, i1
+      return this
+    }
+
+    @Override
+    Appendable append(char c) throws IOException {
+      sb.append c
+      ps.append c
+      return this
     }
   }
 

@@ -1,0 +1,7 @@
+builder-image:
+  image: ${project.rootProject.stackwork.imageId}
+
+specification:
+  image: ${project.stackwork.imageId}
+  links:
+    - builder-image:cassandra

@@ -14,11 +14,6 @@ class StackworkObject {
   Map<String, Map<String, Object>> services = [:]
 
   /**
-   * Module name to type
-   */
-  Map<String, ModuleType> modules = [:]
-
-  /**
    * Absolute path of this project's Docker File
    */
   String dockerFile
@@ -33,7 +28,9 @@ class StackworkObject {
    */
   String containerId
   DockerComposeRunner dockerComposeRunner
+  DockerComposeRunner buildDockerComposeRunner
   File composeLogFile
+  File buildComposeLogFile
 
   StackworkObject(Project project) {
     this.project = project

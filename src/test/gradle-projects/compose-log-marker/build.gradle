@@ -28,6 +28,5 @@ project.task('checkForLogLine') << {
   throw new RuntimeException('Test failed - no "This message shows that your installation appears to be working ' +
           'correctly." found in logs')
 }
-project.tasks.checkForLogLine.dependsOn project.tasks.stopDockerCompose
-project.tasks.cleanDockerCompose.dependsOn project.tasks.checkForLogLine
+project.tasks.checkForLogLine.mustRunAfter project.tasks.stackworkTest
 project.tasks.stackworkCheck.dependsOn project.tasks.checkForLogLine

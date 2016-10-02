@@ -37,4 +37,10 @@ afterEvaluate {
       cleanupTask.mustRunAfter it
     }
   }
+
+  allprojects {
+    project.extensions.findByName('stackwork').imageBuildDependencies.each {
+      it.tasks.cleanup.dependsOn project.tasks.cleanup
+    }
+  }
 }

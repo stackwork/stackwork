@@ -18,37 +18,7 @@ class RunTestImageTask extends AbstractTask {
 
     doLast {
       Project composeProject = project.extensions.getByType(StackworkExtension).composeProject
-      StackworkObject composeProjectStackwork = composeProject.stackwork
-
-      OutputStream containerNameOutput = new ByteArrayOutputStream()
-      project.exec {
-        setCommandLine(['docker-compose', '-f', composeProjectStackwork.dockerComposeRunner.composeFilePath,
-                        '-p', composeProjectStackwork.dockerComposeRunner.projectId, 'run', '-d', project.name])
-        setStandardOutput containerNameOutput
-      }
-      String containerName = containerNameOutput.toString().trim()
-      stackwork.containerId = containerName
-
-      project.exec {
-        setCommandLine(['docker', 'logs', '-f', stackwork.containerId])
-      }
-
-      OutputStream exitCodeOutput = new ByteArrayOutputStream()
-      project.exec {
-        setCommandLine(['docker', 'inspect', '-f=\'{{.State.ExitCode}}\'', stackwork.containerId])
-        setStandardOutput exitCodeOutput
-      }
-      int exitCode = exitCodeOutput.toString().trim() as int
-
-      if (project.extensions.getByType(StackworkExtension).stopContainers) {
-        project.exec {
-          setCommandLine(['docker', 'rm', stackwork.containerId])
-        }
-      }
-
-      if (exitCode != 0) {
-        throw new IllegalArgumentException("Test image '${containerName}' exited with code '${exitCode}'")
-      }
+      ExecutableImageRunner.runTestImage(composeProject, project)
     }
   }
 }

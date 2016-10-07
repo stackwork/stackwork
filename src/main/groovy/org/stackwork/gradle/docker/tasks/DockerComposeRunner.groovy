@@ -136,13 +136,12 @@ class DockerComposeRunner {
     }
 
     def isExecutableImage = { serviceName ->
-      Project composeProject = project.extensions.getByType(StackworkExtension).composeProject
-      StackworkObject composeProjectStackwork = composeProject.stackwork
-      boolean serviceImageIsBuiltInModule = composeProjectStackwork.modules["$serviceName"]
-      if (!serviceImageIsBuiltInModule) return false
-
-      ModuleType moduleType = composeProjectStackwork.modules["$serviceName"]
-      moduleType == TEST_IMAGE || moduleType == BUILDER_IMAGE
+      def projectRelatedToService = project.rootProject.findProject(":${serviceName}")
+      if (projectRelatedToService) {
+        def moduleType = projectRelatedToService.extensions.findByType(StackworkExtension)?.moduleType
+        return TEST_IMAGE == moduleType || BUILDER_IMAGE == moduleType
+      }
+      return false
     }
 
     List<String> allServices = []

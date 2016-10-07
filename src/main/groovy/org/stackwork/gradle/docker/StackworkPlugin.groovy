@@ -66,8 +66,6 @@ class StackworkPlugin implements Plugin<Project> {
     }
 
     project.gradle.projectsEvaluated {
-      StackworkObject stackworkOfComposeProject = getComposeProject().stackwork
-      stackworkOfComposeProject.modules["${project.name}"] = getModuleType()
       coupleComposeTasksToRelatedModulesBuildTasks()
       orderBuildTasksForImageBuildDependencies()
       if (applyBuildStepWithStack()) {

@@ -5,25 +5,49 @@ import org.gradle.api.Project
 import org.stackwork.gradle.docker.StackworkExtension
 import org.stackwork.gradle.docker.StackworkObject
 
+import static org.stackwork.gradle.docker.ModuleType.BUILDER_IMAGE
+
 class ExecutableImageRunner {
 
   static void runTestImage(Project composeProject, Project testImageProject) {
-    runExecutableImage(composeProject, testImageProject)
+    try {
+      runExecutableImage(composeProject, testImageProject)
+    } finally {
+      removeContainer(composeProject, testImageProject)
+    }
   }
 
-  static void runBuildImage(Project buildComposeProject, List<Project> builderImageProjects) {
-    builderImageProjects.each { builderImageProject ->
-      runExecutableImage(buildComposeProject, builderImageProject)
-    }
+  static String runBuildImage(Project buildComposeProject, List<Project> builderImageProjects) {
+    try {
+      builderImageProjects.each { builderImageProject ->
+        runExecutableImage(buildComposeProject, builderImageProject)
+      }
 
-    OutputStream buildComposeContainerIdOutput = new ByteArrayOutputStream()
-    StackworkObject buildComposeStackwork = stackworkFor buildComposeProject
-    buildComposeProject.exec {
-      setCommandLine(['docker-compose', '-f', buildComposeStackwork.dockerComposeRunner.composeFilePath,
-                      '-p', buildComposeStackwork.dockerComposeRunner.projectId, 'ps', '-q', buildComposeProject.name])
-      setStandardOutput buildComposeContainerIdOutput
+      OutputStream mainServiceContainerIdOutput = new ByteArrayOutputStream()
+      StackworkObject buildComposeStackwork = stackworkFor buildComposeProject
+      buildComposeProject.exec {
+        setCommandLine(['docker-compose', '-f', buildComposeStackwork.buildDockerComposeRunner.composeFilePath,
+                        '-p', buildComposeStackwork.buildDockerComposeRunner.projectId, 'ps', '-q',
+                        buildComposeProject.name])
+        setStandardOutput mainServiceContainerIdOutput
+      }
+      def buildContainerId = mainServiceContainerIdOutput.toString().trim()
+
+      buildComposeProject.exec {
+        setCommandLine(['docker', 'stop', buildContainerId])
+      }
+
+      OutputStream mainServiceImageIdOutput = new ByteArrayOutputStream()
+      buildComposeProject.exec {
+        setCommandLine(['docker', 'commit', buildContainerId])
+        setStandardOutput mainServiceImageIdOutput
+      }
+      return mainServiceImageIdOutput.toString().trim()
+    } finally {
+      builderImageProjects.each { builderImageProject ->
+        removeContainer(buildComposeProject, builderImageProject)
+      }
     }
-    buildComposeContainerIdOutput.toString().trim()
   }
 
   private static List runExecutableImage(Project composeProject, Project executableImageProject) {
@@ -31,9 +55,11 @@ class ExecutableImageRunner {
     StackworkObject executableImageProjectStackwork = stackworkFor(executableImageProject)
 
     OutputStream containerNameOutput = new ByteArrayOutputStream()
+    def runner = executableImageProject.extensions.findByType(StackworkExtension).moduleType == BUILDER_IMAGE ?
+        composeProjectStackwork.buildDockerComposeRunner :
+        composeProjectStackwork.dockerComposeRunner
     composeProject.exec {
-      setCommandLine(['docker-compose', '-f', composeProjectStackwork.dockerComposeRunner.composeFilePath,
-                      '-p', composeProjectStackwork.dockerComposeRunner.projectId, 'run',
+      setCommandLine(['docker-compose', '-f', runner.composeFilePath, '-p', runner.projectId, 'run',
                       '-d', executableImageProject.name])
       setStandardOutput containerNameOutput
     }
@@ -51,15 +77,18 @@ class ExecutableImageRunner {
     }
     int exitCode = exitCodeOutput.toString().trim() as int
 
-    if (executableImageProject.extensions.getByType(StackworkExtension).stopContainers) {
-      composeProject.exec {
-        setCommandLine(['docker', 'rm', executableImageProjectStackwork.containerId])
-      }
-    }
-
     if (exitCode != 0) {
       throw new GradleException("Executable (i.e. test- or builder-) image '${containerName}' " +
           "exited with code '${exitCode}'")
+    }
+  }
+
+  private static void removeContainer(Project composeProject, Project executableImageProject) {
+    if (executableImageProject.extensions.getByType(StackworkExtension).stopContainers) {
+      StackworkObject executableImageProjectStackwork = stackworkFor(executableImageProject)
+      composeProject.exec {
+        setCommandLine(['docker', 'rm', '-f', executableImageProjectStackwork.containerId])
+      }
     }
   }
 

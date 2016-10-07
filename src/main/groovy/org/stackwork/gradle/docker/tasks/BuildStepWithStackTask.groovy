@@ -23,17 +23,23 @@ class BuildStepWithStackTask extends DefaultTask {
   def apply() {
     def composeRunner = stackwork.buildDockerComposeRunner
     composeRunner.parseComposeTemplate()
-    composeRunner.run()
+    try {
+      composeRunner.run()
 
-    List<Project> buildDependencyProjects = project.extensions.getByType(StackworkExtension).imageBuildDependencies
-    List<Project> builderImageProjects = buildDependencyProjects.findAll {
-      it.extensions.getByType(StackworkExtension).moduleType == ModuleType.BUILDER_IMAGE
-    }
-    stackwork.imageId = ExecutableImageRunner.runBuildImage(project, builderImageProjects)
-
-    if (project.extensions.getByType(StackworkExtension).stopContainers) {
-      composeRunner.stop()
-      composeRunner.clean()
+      List<Project> buildDependencyProjects = project.extensions.getByType(StackworkExtension).imageBuildDependencies
+      List<Project> builderImageProjects = buildDependencyProjects.findAll {
+        it.extensions.getByType(StackworkExtension).moduleType == ModuleType.BUILDER_IMAGE
+      }
+      logger.info "=========================================================================================="
+      logger.info "IMAGE ID: ${stackwork.imageId}"
+      stackwork.imageId = ExecutableImageRunner.runBuildImage(project, builderImageProjects)
+      logger.info "IMAGE ID: ${stackwork.imageId}"
+      logger.info "=========================================================================================="
+    } finally {
+      if (project.extensions.getByType(StackworkExtension).stopContainers) {
+        composeRunner.stop()
+        composeRunner.clean()
+      }
     }
   }
 

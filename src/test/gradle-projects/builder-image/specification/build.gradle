@@ -4,7 +4,6 @@ apply plugin: 'stackwork'
 
 stackwork {
   moduleType = TEST_IMAGE
-  stopContainers = false
   imageBuildDependencies = [project.project(':cassandra')]
   stackIsRunningWhenLogContains = 'Starting listening for CQL clients on /0.0.0.0:9042 (unencrypted)'
 }

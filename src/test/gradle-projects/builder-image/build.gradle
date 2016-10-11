@@ -13,7 +13,6 @@ apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
 
 stackwork {
   moduleType = IMAGE
-  stopContainers = false
   applyBuildStepWithStack = true
   imageBuildDependencies = [project.project(':builder'), project.project(':cassandra')]
   buildStackIsRunningWhenLogContains = 'Starting listening for CQL clients on /0.0.0.0:9042 (unencrypted)'

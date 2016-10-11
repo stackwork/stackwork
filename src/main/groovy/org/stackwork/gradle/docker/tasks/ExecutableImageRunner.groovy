@@ -42,6 +42,13 @@ class ExecutableImageRunner {
         setCommandLine(['docker', 'commit', buildContainerId])
         setStandardOutput mainServiceImageIdOutput
       }
+
+      if (buildComposeProject.extensions.findByType(StackworkExtension).stopContainers) {
+        buildComposeProject.exec {
+          setCommandLine(['docker', 'rm', buildContainerId])
+        }
+      }
+
       return mainServiceImageIdOutput.toString().trim()
     } finally {
       builderImageProjects.each { builderImageProject ->
@@ -68,6 +75,7 @@ class ExecutableImageRunner {
 
     composeProject.exec {
       setCommandLine(['docker', 'logs', '-f', executableImageProjectStackwork.containerId])
+      setStandardOutput System.out
     }
 
     OutputStream exitCodeOutput = new ByteArrayOutputStream()

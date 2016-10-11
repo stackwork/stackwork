@@ -211,7 +211,6 @@ class DockerPluginSpecification extends Specification {
     GradleOutput output = runGradleTask('builder-image')
 
     then:
-    output.standardOut.contains 'added via ssh by a builder image'
     output.process.exitValue() == 0
   }
 

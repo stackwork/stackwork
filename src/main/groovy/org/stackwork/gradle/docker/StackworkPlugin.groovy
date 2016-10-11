@@ -170,8 +170,8 @@ class StackworkPlugin implements Plugin<Project> {
 
   private void orderBuildTasksForImageBuildDependencies() {
     getImageBuildDependencies().each {
-      parseDockerFileTemplate.dependsOn it.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
-      buildImage.dependsOn it.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
+      project.tasks.parseDockerFileTemplate.dependsOn it.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
+      project.tasks.buildImage.dependsOn it.getTasksByName(BuildImageTask.NAME, NOT_RECURSIVE)
     }
   }
 

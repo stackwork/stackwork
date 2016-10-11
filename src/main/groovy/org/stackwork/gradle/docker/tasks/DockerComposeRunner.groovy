@@ -65,14 +65,20 @@ class DockerComposeRunner {
   void stop() {
     OutputStream out = new ByteArrayOutputStream()
     project.exec {
-      // count the number of containers already exited with a non-zero exit code. Running container are seen by
-      // docker inspect to have ExitCode = 0
+      // count the number of containers already exited with a non-zero exit code. These can be either failed executable
+      // images such as a TEST_IMAGE, or a long-running service that has been exited prematurely.
+      // Running container are seen by docker inspect to have ExitCode = 0
       String commandToSeeIfAnyContainersOfTheStackFailed =
           "docker-compose -f \"${->composeFilePath}\" -p \"${->projectId}\" ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v 0 | wc -l | tr -d ' '"
       commandLine 'bash', '-c', commandToSeeIfAnyContainersOfTheStackFailed
       standardOutput = out
     }
     int nrOfNonZeroExitCodes = out.toString() as Integer
+
+    if (nrOfNonZeroExitCodes > 0) {
+      project.logger.error("SDFAFDSSDASDAHSDJAKHSDJKAKSDAJFKSDAJFKSDJAKFJSDAKFJSDKAJKSDAJKSDAJFKDSAJFDKSAJ")
+      Thread.sleep(500000)
+    }
 
     project.exec {
       commandLine 'docker-compose', '-f', "${->composeFilePath}", '-p', "${->projectId}", 'stop'

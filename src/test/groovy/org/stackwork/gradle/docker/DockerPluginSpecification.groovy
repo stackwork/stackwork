@@ -205,7 +205,6 @@ class DockerPluginSpecification extends Specification {
     output.process.exitValue() != 0
   }
 
-  @IgnoreRest
   def 'A builder image can be used to alter an image produced by a Dockerfile'() {
     when:
     GradleOutput output = runGradleTask('builder-image')

@@ -284,9 +284,9 @@ class DockerComposeRunner {
         new File(logDir, "build.docker-compose-${projectId}.log") :
         new File(logDir, "docker-compose-${projectId}.log")
     if (buildRunner) {
-      stackwork.composeLogFile = logFile
-    } else {
       stackwork.buildComposeLogFile = logFile
+    } else {
+      stackwork.composeLogFile = logFile
     }
     logFile.createNewFile()
     Process compose = new ProcessBuilder(command).

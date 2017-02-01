@@ -19,7 +19,7 @@ task('inspectImage',
         description: 'Inspect the image. If this works, we know it has been built.',
         group: 'Stackwork',
         type: Exec) {
-  commandLine 'docker', 'inspect', '--format=\'{{.Id}}\'', "${-> project.stackwork.imageId}"
+  commandLine 'docker', 'inspect', '-f', '{{.Id}}', "${-> project.stackwork.imageId}"
 }
 
 tasks.inspectImage.dependsOn tasks.buildImage

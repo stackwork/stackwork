@@ -80,7 +80,7 @@ class ExecutableImageRunner {
 
     OutputStream exitCodeOutput = new ByteArrayOutputStream()
     composeProject.exec {
-      setCommandLine(['docker', 'inspect', '-f=\'{{.State.ExitCode}}\'', executableImageProjectStackwork.containerId])
+      setCommandLine(['docker', 'inspect', '-f', '{{.State.ExitCode}}', executableImageProjectStackwork.containerId])
       setStandardOutput exitCodeOutput
     }
     int exitCode = exitCodeOutput.toString().trim() as int

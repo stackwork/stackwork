@@ -23,7 +23,7 @@ class DockerPluginSpecification extends Specification {
     then: 'the build is successful'
     output.process.exitValue() == 0
     and: 'the Docker build output is written to stdOut on gradle -i'
-    output.standardOut.contains 'Step 2 : COPY Dockerfile /'
+    output.standardOut.contains 'COPY Dockerfile /'
   }
 
   def "The Dockerfile may be templated using project properties"() {

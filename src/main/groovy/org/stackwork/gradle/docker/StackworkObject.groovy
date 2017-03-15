@@ -37,4 +37,24 @@ class StackworkObject {
     buildDir = "${project.buildDir}/stackwork-plugin"
   }
 
+
+  @Override
+  String toString() {
+    return "StackworkObject{" +
+        "project=" + project +
+        ", buildDir='" + buildDir + '\'' +
+        ", services=" + services +
+        ", dockerFile='" + dockerFile + '\'' +
+        ", imageId='" + imageId + '\'' +
+        ", fullImageName='" + fullImageName + '\'' +
+        ", composeProject='" + composeProject + '\'' +
+        ", host='" + host + '\'' +
+        ", baseComposeStack='" + baseComposeStack + '\'' +
+        ", containerId='" + containerId + '\'' +
+        ", dockerComposeRunner=" + dockerComposeRunner +
+        ", buildDockerComposeRunner=" + buildDockerComposeRunner +
+        ", composeLogFile=" + composeLogFile +
+        ", buildComposeLogFile=" + buildComposeLogFile +
+        '}'
+  }
 }

@@ -84,8 +84,22 @@ class StackworkPlugin implements Plugin<Project> {
       stackworkObject.host = new URI(dockerHost).host
     } else {
       // in case of local docker daemon
-      project.logger.info('No DOCKER_HOST system variable found. Will expose docker container ips and exposed ports' +
-              ' to the test classes.')
+      project.logger.info 'No DOCKER_HOST system variable found, so assumed is you are using a local Docker daemon'
+
+      OutputStream out = new ByteArrayOutputStream()
+      project.exec {
+        // check if Docker for Mac is the locally installed client, because that creates /var/run/docker.sock
+        // instead of setting the DOCKER_HOST environment variable
+        commandLine 'bash', '-c', 'docker version --format "{{.Server.KernelVersion}}"'
+        standardOutput = out
+      }
+      if (out.toString().contains('moby')) {
+        project.logger.info 'Concluded you are using Docker for Mac. Will expose 127.0.0.1 as ip and forwarded ports ' +
+            'to the test classes.'
+        stackworkObject.host = '127.0.0.1'
+      } else {
+        project.logger.info 'Will expose docker container ips and exposed ports to the test classes.'
+      }
     }
   }
 

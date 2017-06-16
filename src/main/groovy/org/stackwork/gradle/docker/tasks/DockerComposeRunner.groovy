@@ -122,7 +122,7 @@ class DockerComposeRunner {
 
   private void findComposeVersion() {
     composeVersion = composeInfo.containsKey('version') ? parseInt(composeInfo.version as String) : 1
-    if (composeVersion != 1 && composeVersion != 2) {
+    if (composeVersion != 1 && composeVersion != 2 && composeVersion != 3) {
       throw new IllegalDockerComposeFileVersionException(composeFilePath, composeVersion)
     } else {
       project.logger.info "${composeFilePath} uses Docker compose version ${composeVersion}"
@@ -135,7 +135,7 @@ class DockerComposeRunner {
     Map<String, Object> composeServices
     if (composeVersion == 1) {
       composeServices = composeInfo
-    } else if (composeVersion == 2) {
+    } else if (composeVersion == 2 || composeVersion == 3) {
       composeServices = composeInfo.services as Map<String, Object>
     } else {
       throw new IllegalDockerComposeFileVersionException(composeFilePath, composeVersion)

@@ -1,0 +1,8 @@
+${project.stackwork.baseComposeStack}
+
+# base compose stack is version 3, so we need indentation here ... TODO: improve this
+
+  testimage:
+    image: ${project.project(':testimage').stackwork.imageId}
+    links:
+    - service:server

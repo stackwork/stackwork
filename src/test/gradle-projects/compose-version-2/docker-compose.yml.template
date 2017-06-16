@@ -1,6 +1,6 @@
 ${project.stackwork.baseComposeStack}
 
-# base compose stack is version 2, zo we need indentation here ... TODO: improve this
+# base compose stack is version 2, so we need indentation here ... TODO: improve this
 
   testimage:
     image: ${project.project(':testimage').stackwork.imageId}

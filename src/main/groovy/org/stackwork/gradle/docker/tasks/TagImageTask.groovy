@@ -29,7 +29,8 @@ class TagImageTask extends Exec {
       }
     })
 
-    commandLine 'docker', 'tag', "${-> stackwork.imageId}", "${-> getImageName()}:${-> project.version}"
+    executable 'docker'
+    args 'tag', "${-> stackwork.imageId}", "${-> getImageName()}:${-> project.version}"
     doLast {
       stackwork.fullImageName = "${getImageName()}:${project.version}"
     }

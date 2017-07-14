@@ -17,7 +17,8 @@ afterEvaluate {
     }
 
     Task cleanupTask = currentProject.task('cleanup', description: 'Remove the test docker image by id,', type: Exec) {
-      commandLine 'docker', 'rmi', "-f" , "${-> currentProject.stackwork.imageId}"
+      executable 'docker'
+      args "rmi", "-f" , "${-> currentProject.stackwork.imageId}"
     }
     cleanupTask.onlyIf {
       if (!currentProject.extensions.stackwork.stopContainers || !currentProject.tasks.buildImage.didWork) {

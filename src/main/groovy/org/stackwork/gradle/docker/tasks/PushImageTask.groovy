@@ -24,7 +24,8 @@ class PushImageTask extends Exec {
         throw new IllegalStateException('No docker image name defined. Cannot tag image. Please set "stackwork { imageName }".')
       }
     }
-    commandLine 'docker', 'push', "${-> stackwork.fullImageName}"
+    executable 'docker'
+    args 'push', "${-> stackwork.fullImageName}"
   }
 
 }

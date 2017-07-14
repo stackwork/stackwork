@@ -26,7 +26,8 @@ class ExecutableImageRunner {
       OutputStream mainServiceContainerIdOutput = new ByteArrayOutputStream()
       StackworkObject buildComposeStackwork = stackworkFor buildComposeProject
       buildComposeProject.exec {
-        setCommandLine(['docker-compose', '-f', buildComposeStackwork.buildDockerComposeRunner.composeFilePath,
+        setExecutable 'docker-compose'
+        setArgs(['-f', buildComposeStackwork.buildDockerComposeRunner.composeFilePath,
                         '-p', buildComposeStackwork.buildDockerComposeRunner.projectId, 'ps', '-q',
                         buildComposeProject.name])
         setStandardOutput mainServiceContainerIdOutput
@@ -34,18 +35,21 @@ class ExecutableImageRunner {
       def buildContainerId = mainServiceContainerIdOutput.toString().trim()
 
       buildComposeProject.exec {
-        setCommandLine(['docker', 'stop', buildContainerId])
+        setExecutable 'docker'
+        setArgs(['stop', buildContainerId])
       }
 
       OutputStream mainServiceImageIdOutput = new ByteArrayOutputStream()
       buildComposeProject.exec {
-        setCommandLine(['docker', 'commit', buildContainerId])
+        setExecutable 'docker'
+        setArgs(['commit', buildContainerId])
         setStandardOutput mainServiceImageIdOutput
       }
 
       if (buildComposeProject.extensions.findByType(StackworkExtension).stopContainers) {
         buildComposeProject.exec {
-          setCommandLine(['docker', 'rm', buildContainerId])
+          setExecutable 'docker'
+          setArgs(['rm', buildContainerId])
         }
       }
 
@@ -66,21 +70,23 @@ class ExecutableImageRunner {
         composeProjectStackwork.buildDockerComposeRunner :
         composeProjectStackwork.dockerComposeRunner
     composeProject.exec {
-      setCommandLine(['docker-compose', '-f', runner.composeFilePath, '-p', runner.projectId, 'run',
-                      '-d', executableImageProject.name])
+      setExecutable 'docker-compose'
+      setArgs(['-f', runner.composeFilePath, '-p', runner.projectId, 'run', '-d', executableImageProject.name])
       setStandardOutput containerNameOutput
     }
     String containerName = containerNameOutput.toString().trim()
     executableImageProjectStackwork.containerId = containerName
 
     composeProject.exec {
-      setCommandLine(['docker', 'logs', '-f', executableImageProjectStackwork.containerId])
+      setExecutable 'docker'
+      setArgs(['logs', '-f', executableImageProjectStackwork.containerId])
       setStandardOutput System.out
     }
 
     OutputStream exitCodeOutput = new ByteArrayOutputStream()
     composeProject.exec {
-      setCommandLine(['docker', 'inspect', '-f', '{{.State.ExitCode}}', executableImageProjectStackwork.containerId])
+      setExecutable 'docker'
+      setArgs(['inspect', '-f', '{{.State.ExitCode}}', executableImageProjectStackwork.containerId])
       setStandardOutput exitCodeOutput
     }
     int exitCode = exitCodeOutput.toString().trim() as int
@@ -95,7 +101,8 @@ class ExecutableImageRunner {
     if (executableImageProject.extensions.getByType(StackworkExtension).stopContainers) {
       StackworkObject executableImageProjectStackwork = stackworkFor(executableImageProject)
       composeProject.exec {
-        setCommandLine(['docker', 'rm', '-f', executableImageProjectStackwork.containerId])
+        setExecutable 'docker'
+        setArgs(['rm', '-f', executableImageProjectStackwork.containerId])
       }
     }
   }

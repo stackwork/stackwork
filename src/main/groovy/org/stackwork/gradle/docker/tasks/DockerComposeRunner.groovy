@@ -70,7 +70,8 @@ class DockerComposeRunner {
       // Running container are seen by docker inspect to have ExitCode = 0
       String commandToSeeIfAnyContainersOfTheStackFailed =
           "docker-compose -f \"${->composeFilePath}\" -p \"${->projectId}\" ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v 0 | wc -l | tr -d ' '"
-      commandLine 'bash', '-c', commandToSeeIfAnyContainersOfTheStackFailed
+      executable 'bash'
+      args '-c', commandToSeeIfAnyContainersOfTheStackFailed
       standardOutput = out
     }
     int nrOfNonZeroExitCodes = out.toString() as Integer
@@ -81,7 +82,8 @@ class DockerComposeRunner {
     }
 
     project.exec {
-      commandLine 'docker-compose', '-f', "${->composeFilePath}", '-p', "${->projectId}", 'stop'
+      executable 'docker-compose'
+      args '-f', "${->composeFilePath}", '-p', "${->projectId}", 'stop'
     }
 
     project.logger.info "Stack will be exited. '$nrOfNonZeroExitCodes' container(s) already have a non-zero exit code."
@@ -95,7 +97,8 @@ class DockerComposeRunner {
 
   void clean() {
     project.exec {
-      commandLine 'docker-compose', '-f', "${->composeFilePath}", '-p', "${->projectId}", 'down'
+      executable 'docker-compose'
+      args '-f', "${->composeFilePath}", '-p', "${->projectId}", 'down'
     }
   }
 
@@ -256,7 +259,8 @@ class DockerComposeRunner {
   private String askComposeServicesContainerId(String serviceName) {
     OutputStream os = new ByteArrayOutputStream()
     project.exec {
-      commandLine 'docker-compose', '-f', composeFilePath, '-p', projectId, 'ps', '-q', serviceName
+      executable 'docker-compose'
+      args '-f', composeFilePath, '-p', projectId, 'ps', '-q', serviceName
       standardOutput = os
     }
     os.toString().trim()
@@ -265,7 +269,8 @@ class DockerComposeRunner {
   private Map<String, Object> dockerInspectContainer(String containerId) {
     OutputStream containerInfoOS = new ByteArrayOutputStream()
     project.exec {
-      commandLine 'docker', 'inspect', containerId
+      executable 'docker'
+      args 'inspect', containerId
       standardOutput = containerInfoOS
     }
     (new Yaml().load(containerInfoOS.toString()))[0] as Map<String, Object>

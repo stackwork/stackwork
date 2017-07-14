@@ -15,7 +15,8 @@ class BuildImageTask extends Exec {
     description = 'Builds the Dockerfile in your project root folder.'
     group = 'Stackwork'
 
-    commandLine 'docker', 'build', '--file', "${-> stackwork.dockerFile}", project.projectDir
+    executable 'docker'
+    args 'build', '--file', "${-> stackwork.dockerFile}", project.projectDir
 
     def buffer = new ByteArrayOutputStream()
     standardOutput = new OutputStreams([standardOutput, buffer])

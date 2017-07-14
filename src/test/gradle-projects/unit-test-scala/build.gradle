@@ -1,0 +1,16 @@
+import static org.stackwork.gradle.docker.ModuleType.*
+
+buildscript {
+  repositories {
+    maven { url = "file://${project.projectDir}/../../../../build/repoForTests" }
+    mavenCentral()
+  }
+  dependencies {
+    classpath group: 'org.stackwork.gradle', name: 'stackwork', version: '0.1-TEST'
+  }
+}
+apply from: '../../gradle-plugins/stackwork-extended-for-tests.gradle'
+
+stackwork {
+  moduleType = IMAGE
+}

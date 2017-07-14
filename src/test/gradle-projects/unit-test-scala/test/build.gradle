@@ -1,0 +1,24 @@
+import static org.stackwork.gradle.docker.ModuleType.*
+
+apply plugin: 'scala'
+apply plugin: 'stackwork'
+
+stackwork {
+  moduleType = TEST
+}
+
+def scala(String name) {
+  name + '_2.11'
+}
+
+dependencies {
+  compile gradleApi()
+  compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.11'
+
+  // finch
+  testCompile group: 'com.github.finagle', name: scala('finch-core'), version: '0.13.1'
+  testCompile group: 'com.github.finagle', name: scala('finch-circe'), version: '0.13.0'
+
+  testCompile 'junit:junit:4.12'
+  testCompile group: 'org.scalatest', name: scala('scalatest'), version: '3.0.1'
+}

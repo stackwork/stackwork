@@ -42,6 +42,14 @@ class DockerPluginSpecification extends Specification {
     output.process.exitValue() == 0
   }
 
+  def "A test module that applies the ScalaPlugin is allowed to connect to an image in unit tests trough appropriately set system properties"() {
+    when:
+    GradleOutput output = runGradleTask('unit-test-scala')
+
+    then:
+    output.process.exitValue() == 0
+  }
+
   def "The tag image task tags a built image with 'stackwork {imageName}:project.version' number, which is exposed as 'stackwork.fullImageName'"() {
     when:
     GradleOutput output = runGradleTask('tag')

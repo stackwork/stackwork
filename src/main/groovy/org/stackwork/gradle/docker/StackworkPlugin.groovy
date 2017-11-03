@@ -90,7 +90,7 @@ class StackworkPlugin implements Plugin<Project> {
       project.exec {
         // check if Docker for Mac is the locally installed client, because that creates /var/run/docker.sock
         // instead of setting the DOCKER_HOST environment variable
-        executable 'bash'
+        executable '/bin/bash'
         args '-c', 'docker version --format "{{.Server.KernelVersion}}"'
         standardOutput = out
       }

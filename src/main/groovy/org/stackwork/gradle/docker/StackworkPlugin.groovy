@@ -91,7 +91,7 @@ class StackworkPlugin implements Plugin<Project> {
         // check if Docker for Mac is the locally installed client, because that creates /var/run/docker.sock
         // instead of setting the DOCKER_HOST environment variable
         executable '/bin/bash'
-        args '-c', 'docker version --format "{{.Server.KernelVersion}}"'
+        args '-c', '\'docker version --format "{{.Server.KernelVersion}}"\''
         standardOutput = out
       }
       if (out.toString().contains('moby')) {

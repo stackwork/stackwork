@@ -78,7 +78,7 @@ class DockerComposeRunner {
 
     if (nrOfNonZeroExitCodes > 0) {
       project.logger.error("SDFAFDSSDASDAHSDJAKHSDJKAKSDAJFKSDAJFKSDJAKFJSDAKFJSDKAJKSDAJKSDAJFKDSAJFDKSAJ")
-      Thread.sleep(500000)
+      Thread.sleep(500)
     }
 
     project.exec {

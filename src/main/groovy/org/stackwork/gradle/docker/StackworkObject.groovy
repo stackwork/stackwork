@@ -1,5 +1,6 @@
 package org.stackwork.gradle.docker
 
+import groovy.transform.Memoized
 import org.gradle.api.Project
 import org.stackwork.gradle.docker.tasks.DockerComposeRunner
 
@@ -20,7 +21,6 @@ class StackworkObject {
   String imageId
   String fullImageName
   String composeProject
-  String host
   String baseComposeStack
 
   /**
@@ -37,6 +37,36 @@ class StackworkObject {
     buildDir = "${project.buildDir}/stackwork-plugin"
   }
 
+  @Memoized
+  String getHost() {
+    String dockerHost = System.getenv('DOCKER_HOST')
+    if (dockerHost) {
+      // in case of remote connection to docker daemon
+      project.logger.info("DOCKER_HOST system variable with value '$dockerHost' found. Will expose docker " +
+              "container forwarded ports and the DOCKER_HOST to the test classes.")
+      return new URI(dockerHost).host
+    } else {
+      // in case of local docker daemon
+      project.logger.info 'No DOCKER_HOST system variable found, so assumed is you are using a local Docker daemon'
+
+      OutputStream out = new ByteArrayOutputStream()
+      project.exec {
+        // check if Docker for Mac is the locally installed client, because that creates /var/run/docker.sock
+        // instead of setting the DOCKER_HOST environment variable
+        executable '/bin/bash'
+        args '-c', 'docker version --format "{{.Server.KernelVersion}}"'
+        standardOutput = out
+      }
+      if (out.toString().contains('moby')) {
+        project.logger.info 'Concluded you are using Docker for Mac. Will expose 127.0.0.1 as ip and forwarded ports ' +
+                'to the test classes.'
+        return '127.0.0.1'
+      } else {
+        project.logger.info 'Will expose docker container ips and exposed ports to the test classes.'
+        return null
+      }
+    }
+  }
 
   @Override
   String toString() {

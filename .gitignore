@@ -5,6 +5,7 @@ tmp/
 src/test/gradle-projects/*/build/
 src/test/gradle-projects/*/*/build/
 .gradle
+.gradletasknamecache
 
 # only commit the encrypted version of the gradle properties
 gradle.properties

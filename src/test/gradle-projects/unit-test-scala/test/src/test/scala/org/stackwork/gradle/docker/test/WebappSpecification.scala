@@ -1,29 +1,50 @@
 package org.stackwork.gradle.docker.test
 
+import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.{Http, Service, http}
+import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.junit.JUnitRunner
-import com.twitter.finagle.Http
-import com.twitter.finagle.http
-import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.Service
-import com.twitter.util.{Await, Future}
 
 @RunWith(classOf[JUnitRunner])
-class WebappSpecification extends FunSuite {
+class WebappSpecification extends FunSuite with ScalaFutures {
 
-  test("We can make a request to a web service running in Docker") {
+  test("We can make a request to a web service running in Docker, using an assigned port") {
 
     val host = System.getProperty("stackwork.service.host")
     val port = System.getProperty("stackwork.service.port")
 
-    val client = Http.client.newService(s"$host:$port")
-    val request = http.Request(http.Method.Get, "/")
-    val response = client(request)
+    val endpoint: Service[Request, Response] = Http.client.newService(s"$host:$port")
+    val request = http.Request("/")
+    request.host = s"$host:$port"
+    val response = Await.result(endpoint(request))
+    assert(response.status.code === 200)
+  }
 
-    Await.result(response.onSuccess { rep: http.Response =>
-      assert(rep.status === 200)
-    })
+  test("We can make a request to a web service running in Docker, using port nr. 1 specifically") {
+
+    val host = System.getProperty("stackwork.service.host")
+    val port = System.getProperty("stackwork.service.port_80")
+
+    val endpoint: Service[Request, Response] = Http.client.newService(s"$host:$port")
+    val request = http.Request("/")
+    request.host = s"$host:$port"
+    val response = Await.result(endpoint(request))
+    assert(response.status.code === 200)
+  }
+
+  test("We can make a request to a web service running in Docker, using port nr. 2 specifically") {
+
+    val host = System.getProperty("stackwork.service.host")
+    val port = System.getProperty("stackwork.service.port_81")
+
+    val endpoint: Service[Request, Response] = Http.client.newService(s"$host:$port")
+    val request = http.Request("/")
+    request.host = s"$host:$port"
+    val response = Await.result(endpoint(request))
+    assert(response.status.code === 200)
   }
 
 }

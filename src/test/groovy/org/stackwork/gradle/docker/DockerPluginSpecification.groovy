@@ -1,7 +1,5 @@
 package org.stackwork.gradle.docker
 
-import spock.lang.Ignore
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class DockerPluginSpecification extends Specification {
@@ -42,7 +40,7 @@ class DockerPluginSpecification extends Specification {
     output.process.exitValue() == 0
   }
 
-  def "A test module that applies the ScalaPlugin is allowed to connect to an image in unit tests trough appropriately set system properties"() {
+  def "A test module that applies the ScalaPlugin is allowed to connect to an image on multiple ports in unit tests trough appropriately set system properties"() {
     when:
     GradleOutput output = runGradleTask('unit-test-scala')
 

@@ -221,8 +221,8 @@ class DockerComposeRunner {
 
         if (stackwork.host) {
           if (!forwardedPorts) {
-            project.logger.warn("No port forwarding defined for service '$serviceName'. " +
-                "No port configuration will be exposed.")
+            project.logger.warn("No port forwarding defined for service '$serviceName' and exposed " +
+                "port ${exposedPort}. No port configuration will be exposed.")
             return
           }
           if (forwardedPorts.isEmpty()) {
@@ -232,12 +232,14 @@ class DockerComposeRunner {
               project.logger.warn("Multiple forwarded ports found for exposed port: '$exposedPort'. " +
                   "Continuing with a randomly selected port.")
             }
-            serviceInfo.port = forwardedPorts.first().HostPort
+            String port = forwardedPorts.first().HostPort
+            serviceInfo.port = port
+            serviceInfo."port_${exposedPort}" = port
           }
           serviceInfo.host = stackwork.host
         } else {
           serviceInfo.port = exposedPort
-          serviceInfo["port.${exposedPort}"] = exposedPort
+          serviceInfo."port_${exposedPort}" = exposedPort
           if (composeVersion == 1) {
             serviceInfo.host = containerInfo.NetworkSettings.IPAddress
           } else if (composeVersion == 2) {

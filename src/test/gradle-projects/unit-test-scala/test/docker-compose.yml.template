@@ -2,3 +2,4 @@ service:
   image: ${rootProject.stackwork.imageId}
   ports:
   - 80
+  - 81

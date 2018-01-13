@@ -24,7 +24,7 @@ class StackworkObject {
   String baseComposeStack
 
   /**
-   * Container ID in case of a module that has an executable image such as a {@link ModuleType.TEST_IMAGE}
+   * Container ID in case of a module that has an executable image such as a {@link ModuleType#TEST_IMAGE}
    */
   String containerId
   DockerComposeRunner dockerComposeRunner

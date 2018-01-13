@@ -77,10 +77,12 @@ class DockerPluginSpecification extends Specification {
   def "The push image task tries to push an image."() {
     when:
     GradleOutput output = runGradleTask('push-public-hub-no-namespace', NO_STACKTRACE)
+    def pushLine = output.standardOut.readLines().find { s -> s.contains 'push refers' }
 
     then:
     output.process.exitValue() != 0
-    output.standardOut.contains 'The push refers to a repository [docker.io/library/my-image]'
+    pushLine != null
+    pushLine.contains 'docker.io/library/my-image'
   }
 
   def 'The runTestImage task runs the test image built in a test-image module against the docker compose setup'() {

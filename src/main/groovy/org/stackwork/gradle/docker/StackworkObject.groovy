@@ -54,10 +54,10 @@ class StackworkObject {
         // check if Docker for Mac is the locally installed client, because that creates /var/run/docker.sock
         // instead of setting the DOCKER_HOST environment variable
         executable '/bin/bash'
-        args '-c', 'docker version --format "{{.Server.KernelVersion}}"'
+        args '-c', 'docker info'
         standardOutput = out
       }
-      if (out.toString().contains('moby')) {
+      if (out.toString().contains('Docker for Mac')) {
         project.logger.info 'Concluded you are using Docker for Mac. Will expose 127.0.0.1 as ip and forwarded ports ' +
                 'to the test classes.'
         return '127.0.0.1'

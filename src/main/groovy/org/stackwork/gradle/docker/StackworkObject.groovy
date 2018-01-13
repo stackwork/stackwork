@@ -49,15 +49,7 @@ class StackworkObject {
       // in case of local docker daemon
       project.logger.info 'No DOCKER_HOST system variable found, so assumed is you are using a local Docker daemon'
 
-      OutputStream out = new ByteArrayOutputStream()
-      project.exec {
-        // check if Docker for Mac is the locally installed client, because that creates /var/run/docker.sock
-        // instead of setting the DOCKER_HOST environment variable
-        executable '/bin/bash'
-        args '-c', 'docker info'
-        standardOutput = out
-      }
-      if (out.toString().contains('Docker for Mac')) {
+      if (detectDockerForMacNew() || detectDockerForMacOld()) {
         project.logger.info 'Concluded you are using Docker for Mac. Will expose 127.0.0.1 as ip and forwarded ports ' +
                 'to the test classes.'
         return '127.0.0.1'
@@ -65,6 +57,34 @@ class StackworkObject {
         project.logger.info 'Will expose docker container ips and exposed ports to the test classes.'
         return null
       }
+    }
+  }
+
+  @Memoized
+  private boolean detectDockerForMacNew() {
+    new ByteArrayOutputStream().withCloseable { out ->
+      project.exec {
+        // check if Docker for Mac is the locally installed client, because that creates /var/run/docker.sock
+        // instead of setting the DOCKER_HOST environment variable
+        executable '/bin/bash'
+        args '-c', 'docker info'
+        standardOutput = out
+      }
+      out.toString().contains 'Docker for Mac'
+    }
+  }
+
+  @Memoized
+  private boolean detectDockerForMacOld() {
+    new ByteArrayOutputStream().withCloseable { out ->
+      project.exec {
+        // check if Docker for Mac is the locally installed client, because that creates /var/run/docker.sock
+        // instead of setting the DOCKER_HOST environment variable
+        executable '/bin/bash'
+        args '-c', 'docker version --format "{{.Server.KernelVersion}}"'
+        standardOutput = out
+      }
+      out.toString().contains 'moby'
     }
   }
 

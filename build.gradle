@@ -90,6 +90,11 @@ pluginBundle {
   }
 }
 
+tasks.test {
+  inputs.dir("src/test/gradle-plugins").withPropertyName("pluginsDir").withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.dir("src/test/gradle-projects").withPropertyName("projectsDir").withPathSensitivity(PathSensitivity.RELATIVE)
+}
+
 /**
  * Upload the build result to a local repositories that is used in the tests
  */
